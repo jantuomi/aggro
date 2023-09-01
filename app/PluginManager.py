@@ -3,10 +3,10 @@ import schedule
 import time
 from types import ModuleType
 from typing import Any
-from AggroConfig import AggroConfig
-from Item import Item
-from PluginInterface import PluginInterface
-from utils import get_param
+from app.Item import Item
+from app.PluginInterface import PluginInterface
+from app.AggroConfig import AggroConfig
+from app.utils import get_param
 
 
 class PluginManager:
@@ -17,7 +17,7 @@ class PluginManager:
         self.config = config
 
     def load_plugin(self, plugin_name: str) -> None:
-        module: ModuleType = importlib.import_module(plugin_name)
+        module: ModuleType = importlib.import_module(f"app.{plugin_name}")
         plugin_class = module.Plugin
         self._plugins[plugin_name] = plugin_class
 

@@ -1,8 +1,8 @@
 import feedparser  # type: ignore
 from typing import Any
-from Item import Item
-from PluginInterface import PluginInterface
-from utils import get_param
+from app.Item import Item
+from app.PluginInterface import PluginInterface
+from app.utils import get_param
 
 
 class Plugin(PluginInterface):

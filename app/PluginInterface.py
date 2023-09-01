@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from Item import Item
+from app.Item import Item
 
 
 class PluginInterface(ABC):

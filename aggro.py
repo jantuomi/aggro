@@ -1,7 +1,8 @@
 import json
-from AggroConfig import AggroConfig
-from PluginManager import PluginManager
 import os
+
+from app.AggroConfig import AggroConfig
+from app.PluginManager import PluginManager
 
 if __name__ == "__main__":
     print("Starting aggro. Press CTRL-C to exit.")
