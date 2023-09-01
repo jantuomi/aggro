@@ -1,0 +1,4 @@
+feedparser==6.0.10
+schedule==1.2.0
+sgmllib3k==1.0.0
+tinydb==4.8.0

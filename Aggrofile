@@ -1,0 +1,20 @@
+{
+    "plugins": {
+        "juusomikkonen_blog_rss": {
+            "plugin": "FeedSourcePlugin",
+            "trigger_type": "schedule",
+            "schedule_expr": "schedule.every(10).seconds",
+            "feed_url": "https://juusomikkonen.com/feed.xml"
+        },
+        "title_filter": {
+            "plugin": "FilterPlugin",
+            "trigger_type": "input_change",
+            "filter_expr": "'Guarding against any-typed values in TypeScript' in item.title"
+        }
+    },
+    "graph": {
+        "juusomikkonen_blog_rss": [
+            "title_filter"
+        ]
+    }
+}
