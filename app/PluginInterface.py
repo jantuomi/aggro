@@ -10,9 +10,5 @@ class PluginInterface(ABC):
         self.params = params
 
     @abstractmethod
-    def validate_input_n(self, n: int) -> bool:
-        raise NotImplemented("abstract method not implemented")
-
-    @abstractmethod
-    def process(self, inputs: list[list[Item]]) -> list[Item]:
+    def process(self, items: list[Item]) -> list[Item]:
         pass

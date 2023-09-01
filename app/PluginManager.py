@@ -36,7 +36,7 @@ class PluginManager:
             return
 
         plugin: PluginInterface = self.plugin_instances[id]
-        ret_items: list[Item] = plugin.process([items])
+        ret_items: list[Item] = plugin.process(items)
         self.propagate(id, ret_items)
 
     def build_plugin_instances(self):

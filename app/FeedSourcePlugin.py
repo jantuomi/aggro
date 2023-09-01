@@ -12,17 +12,19 @@ class Plugin(PluginInterface):
 
         print(f"[FeedSourcePlugin#{self.id}] initialized")
 
-    def validate_input_n(self, n: int) -> bool:
-        return n == 0
-
-    def process(self, inputs: list[list[Item]]) -> list[Item]:
+    def process(self, items: list[Item]) -> list[Item]:
         print(f"[FeedSourcePlugin#{self.id}] process called")
         feed: Any = feedparser.parse(self.feed_url)  # type: ignore
-        items: list[Item] = []
+        result_items: list[Item] = []
+        if "bozo" in feed and feed["bozo"] == 1:
+            raise Exception(
+                f"[FeedSourcePlugin#{self.id}] malformed XML in feed {self.feed_url}"
+            )
+
         for d in feed.entries:
-            items.append(
+            result_items.append(
                 Item(title=d["title"], link=d["link"], description=d["description"])
             )
 
         print(f"[FeedSourcePlugin#{self.id}] process returns items, n={len(items)}")
-        return items
+        return result_items

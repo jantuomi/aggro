@@ -9,12 +9,20 @@
         "title_filter": {
             "plugin": "FilterPlugin",
             "trigger_type": "input_change",
-            "filter_expr": "'Guarding against any-typed values in TypeScript' in item.title"
+            "filter_expr": "'TypeScript' in item.title"
+        },
+        "output_feed": {
+            "plugin": "FeedSinkPlugin",
+            "trigger_type": "input_change",
+            "feed_name": "test_feed"
         }
     },
     "graph": {
         "juusomikkonen_blog_rss": [
             "title_filter"
+        ],
+        "title_filter": [
+            "output_feed"
         ]
     }
 }
