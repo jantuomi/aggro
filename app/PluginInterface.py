@@ -10,5 +10,5 @@ class PluginInterface(ABC):
         self.params = params
 
     @abstractmethod
-    def process(self, items: list[Item]) -> list[Item]:
+    def process(self, source_id: str | None, items: list[Item]) -> list[Item]:
         pass

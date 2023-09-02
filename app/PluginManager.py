@@ -21,8 +21,6 @@ class PluginManager:
         plugin_class = module.Plugin
         self._plugins[plugin_name] = plugin_class
 
-    # TODO instead of propagating procedurally,
-    # insert data into an next_node_id-identified input queue in tinydb
     def propagate(self, id: str, items: list[Item]):
         next_nodes: list[str]
         if id not in self.config.graph:
@@ -31,14 +29,14 @@ class PluginManager:
             next_nodes = self.config.graph[id]
 
         for next_node_id in next_nodes:
-            self.run_plugin_job(next_node_id, items)
+            self.run_plugin_job(next_node_id, id, items)
 
-    def run_plugin_job(self, id: str, items: list[Item] = []):
+    def run_plugin_job(self, id: str, source_id: str | None, items: list[Item] = []):
         if not memory_state.running:
             return
 
         plugin: PluginInterface = self.plugin_instances[id]
-        ret_items: list[Item] = plugin.process(items)
+        ret_items: list[Item] = plugin.process(source_id, items)
         self.propagate(id, ret_items)
 
     def build_plugin_instances(self):
@@ -47,20 +45,14 @@ class PluginManager:
             params: dict[str, str] = self.config.plugins[id]
 
             plugin_name = get_param("plugin", params)
-            trigger_type = get_param("trigger_type", params)
+            schedule_expr: str | None = params.get("schedule_expr", None)
 
             if plugin_name not in self._plugins:
                 self.load_plugin(plugin_name)
 
-            match trigger_type:
-                case "schedule":
-                    schedule_expr = get_param("schedule_expr", params)
-                    job: schedule.Job = eval(schedule_expr, {"schedule": schedule})
-                    job.do(self.run_plugin_job, id)  # type: ignore
-                case "input_change":
-                    pass
-                case _:
-                    raise Exception("unknown trigger_type: " + trigger_type)
+            if schedule_expr is not None:
+                job: schedule.Job = eval(schedule_expr, {"schedule": schedule})
+                job.do(self.run_plugin_job, id, None)  # type: ignore
 
             PluginClass: Any = self._plugins[plugin_name]
             plugin: PluginInterface = PluginClass(id=id, params=params)

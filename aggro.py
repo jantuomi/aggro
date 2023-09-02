@@ -5,6 +5,7 @@ import time
 from app.AggroConfig import AggroConfig
 from app.MemoryState import memory_state
 from app.PluginManager import PluginManager
+from app.database import setup_db
 
 
 def run_plugin_thread():
@@ -22,8 +23,12 @@ if __name__ == "__main__":
         aggrofile_content = json.loads(f.read())
 
     aggro_config = AggroConfig(
-        plugins=aggrofile_content["plugins"], graph=aggrofile_content["graph"]
+        db_path=aggrofile_content.get("db_path", "db.json"),
+        plugins=aggrofile_content["plugins"],
+        graph=aggrofile_content["graph"],
     )
+
+    setup_db(aggro_config)
 
     manager = PluginManager(aggro_config)
     manager.build_plugin_instances()

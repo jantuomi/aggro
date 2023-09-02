@@ -1,19 +1,17 @@
 {
+    "db_path": "db.json",
     "plugins": {
         "juusomikkonen_blog_rss": {
             "plugin": "FeedSourcePlugin",
-            "trigger_type": "schedule",
             "schedule_expr": "schedule.every(10).seconds",
             "feed_url": "https://juusomikkonen.com/feed.xml"
         },
         "title_filter": {
             "plugin": "FilterPlugin",
-            "trigger_type": "input_change",
             "filter_expr": "'TypeScript' in item.title"
         },
         "output_feed": {
             "plugin": "FeedSinkPlugin",
-            "trigger_type": "input_change",
             "feed_name": "test_feed"
         }
     },

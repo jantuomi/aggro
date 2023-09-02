@@ -12,8 +12,13 @@ class Plugin(PluginInterface):
 
         print(f"[FeedSourcePlugin#{self.id}] initialized")
 
-    def process(self, items: list[Item]) -> list[Item]:
+    def process(self, source_id: str | None, items: list[Item]) -> list[Item]:
         print(f"[FeedSourcePlugin#{self.id}] process called")
+        if source_id is not None:
+            raise Exception(
+                f"FeedSourcePlugin#{self.id} can only be scheduled, trying to process items from source {source_id}"
+            )
+
         feed: Any = feedparser.parse(self.feed_url)  # type: ignore
         result_items: list[Item] = []
         if "bozo" in feed and feed["bozo"] == 1:
@@ -26,5 +31,7 @@ class Plugin(PluginInterface):
                 Item(title=d["title"], link=d["link"], description=d["description"])
             )
 
-        print(f"[FeedSourcePlugin#{self.id}] process returns items, n={len(items)}")
+        print(
+            f"[FeedSourcePlugin#{self.id}] process returns items, n={len(result_items)}"
+        )
         return result_items

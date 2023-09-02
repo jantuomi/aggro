@@ -54,8 +54,11 @@ class Plugin(PluginInterface):
 
         return ET.tostring(rss, "unicode")
 
-    def process(self, items: list[Item]) -> list[Item]:
+    def process(self, source_id: str | None, items: list[Item]) -> list[Item]:
         print(f"[FeedSinkPlugin#{self.id}] process called, n={len(items)}")
+        if source_id is None:
+            raise Exception(f"FeedSinkPlugin#{self.id} can not be scheduled")
+
         ret = self.build_xml(items)
         print(f"[FeedSinkPlugin#{self.id}] process returning XML:")
         print(ret)
