@@ -1,47 +1,34 @@
 from typing import Any
+import xml.etree.ElementTree as ET
+
+from tinydb import Query
+
 from app.Item import Item
 from app.PluginInterface import PluginInterface
 from app.utils import get_param
-import xml.etree.ElementTree as ET
-
-
-# <?xml version="1.0" encoding="UTF-8" ?>
-# <rss version="2.0">
-
-# <channel>
-#   <title>W3Schools Home Page</title>
-#   <link>https://www.w3schools.com</link>
-#   <description>Free web building tutorials</description>
-#   <item>
-#     <title>RSS Tutorial</title>
-#     <link>https://www.w3schools.com/xml/xml_rss.asp</link>
-#     <description>New RSS tutorial on W3Schools</description>
-#   </item>
-#   <item>
-#     <title>XML Tutorial</title>
-#     <link>https://www.w3schools.com/xml</link>
-#     <description>New XML tutorial on W3Schools</description>
-#   </item>
-# </channel>
-
-# </rss>
+from app.database import database_manager
 
 
 class Plugin(PluginInterface):
     def __init__(self, id: str, params: dict[str, Any]) -> None:
         super().__init__(id, params)
-        self.feed_name: str = get_param("feed_name", params)
+        self.feed_id: str = get_param("feed_id", params)
+        self.feed_title: str = get_param("feed_title", params)
+        self.feed_link: str | None = params.get("feed_link", None)
+        self.feed_description: str = get_param("feed_description", params)
         print(f"[FeedSinkPlugin#{self.id}] initialized")
+        print(f"[FeedSinkPlugin#{self.id}] feed will be served at path /{self.feed_id}")
 
     def build_xml(self, items: list[Item]):
         rss = ET.Element("rss", {"version": "2.0"})
         channel = ET.SubElement(rss, "channel")
         title = ET.SubElement(channel, "title")
-        title.text = "channel title"
-        link = ET.SubElement(channel, "link")
-        link.text = "channel link"
+        title.text = self.feed_title
+        if self.feed_link is not None:
+            link = ET.SubElement(channel, "link")
+            link.text = self.feed_link
         description = ET.SubElement(channel, "description")
-        description.text = "channel description"
+        description.text = self.feed_description
 
         for item in items:
             item_elem = ET.SubElement(channel, "item")
@@ -56,10 +43,15 @@ class Plugin(PluginInterface):
 
     def process(self, source_id: str | None, items: list[Item]) -> list[Item]:
         print(f"[FeedSinkPlugin#{self.id}] process called, n={len(items)}")
+
         if source_id is None:
             raise Exception(f"FeedSinkPlugin#{self.id} can not be scheduled")
+        if database_manager.db is None:
+            raise Exception("Database is not initialized")
 
         ret = self.build_xml(items)
-        print(f"[FeedSinkPlugin#{self.id}] process returning XML:")
-        print(ret)
+
+        Q = Query()
+        database_manager.db.upsert({"feed_id": self.feed_id, "feed_xml": ret}, Q.feed_id == self.feed_id)  # type: ignore
+        print(f"[FeedSinkPlugin#{self.id}] processed")
         return []

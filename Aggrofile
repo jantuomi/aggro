@@ -6,17 +6,27 @@
             "schedule_expr": "schedule.every(10).seconds",
             "feed_url": "https://juusomikkonen.com/feed.xml"
         },
+        "mariusschulz_blog_atom": {
+            "plugin": "FeedSourcePlugin",
+            "schedule_expr": "schedule.every(10).seconds",
+            "feed_url": "https://feeds.feedburner.com/mariusschulz"
+        },
         "title_filter": {
             "plugin": "FilterPlugin",
             "filter_expr": "'TypeScript' in item.title"
         },
         "output_feed": {
             "plugin": "FeedSinkPlugin",
-            "feed_name": "test_feed"
+            "feed_id": "test_feed",
+            "feed_title": "Only Typescript posts",
+            "feed_description": "Feed where all posts have Typescript in the title"
         }
     },
     "graph": {
         "juusomikkonen_blog_rss": [
+            "title_filter"
+        ],
+        "mariusschulz_blog_atom": [
             "title_filter"
         ],
         "title_filter": [
