@@ -7,13 +7,13 @@ from app.Item import Item
 from app.PluginInterface import PluginInterface
 from app.AggroConfig import AggroConfig
 from app.utils import get_param
+from app.MemoryState import memory_state
 
 
 class PluginManager:
     def __init__(self, config: AggroConfig) -> None:
         self._plugins: dict[str, Any] = {}
         self.plugin_instances: dict[str, PluginInterface] = {}
-        self.running = False
         self.config = config
 
     def load_plugin(self, plugin_name: str) -> None:
@@ -21,6 +21,8 @@ class PluginManager:
         plugin_class = module.Plugin
         self._plugins[plugin_name] = plugin_class
 
+    # TODO instead of propagating procedurally,
+    # insert data into an next_node_id-identified input queue in tinydb
     def propagate(self, id: str, items: list[Item]):
         next_nodes: list[str]
         if id not in self.config.graph:
@@ -32,7 +34,7 @@ class PluginManager:
             self.run_plugin_job(next_node_id, items)
 
     def run_plugin_job(self, id: str, items: list[Item] = []):
-        if not self.running:
+        if not memory_state.running:
             return
 
         plugin: PluginInterface = self.plugin_instances[id]
@@ -65,7 +67,6 @@ class PluginManager:
             self.plugin_instances[id] = plugin
 
     def run(self) -> None:
-        self.running = True
-        while self.running:
+        while memory_state.running:
             schedule.run_pending()
             time.sleep(1)
