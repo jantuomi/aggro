@@ -29,16 +29,32 @@ class Plugin(PluginInterface):
         plugin_state_q = Query().plugin_id == self.id
         _d: Any = database_manager.plugin_states.get(plugin_state_q)  # type: ignore
         data: dict[str, Any] = (
-            _d if _d is not None else {"plugin_id": self.id, "state": []}
+            _d
+            if _d is not None
+            else {
+                "plugin_id": self.id,
+                "state": {"cutoff_timestamp": time.localtime(), "channels": {}},
+            }
         )
-        state: list[ItemDict] = data["state"]
-        items_to_digest = map(dict_to_item, state)
+        state = data["state"]
+        channels: dict[str, list[ItemDict]] = state["channels"]
+        cutoff_timestamp = time.struct_time(state["cutoff_timestamp"])
+
+        aggregated_items: list[Item] = []
+        for data_source_id in channels:
+            item_dicts = channels[data_source_id]
+            items = list(map(dict_to_item, item_dicts))
+            for item in items:
+                if item.pub_date is not None and cutoff_timestamp < item.pub_date:
+                    aggregated_items.append(item)
+
+        state["cutoff_timestamp"] = time.localtime()
 
         digest_desc = (
             f"{self.digest_description}<br><br>" if self.digest_description else ""
         )
 
-        for item in items_to_digest:
+        for item in aggregated_items:
             pub_date_stamp = (
                 time.strftime("%a, %d %b %Y %H:%M:%S +0000", item.pub_date)
                 if item.pub_date
@@ -62,7 +78,7 @@ class Plugin(PluginInterface):
         )
 
         database_manager.plugin_states.upsert(  # type: ignore
-            {"plugin_id": self.id, "state": []}, plugin_state_q
+            {"plugin_id": self.id, "state": state}, plugin_state_q
         )
 
         return [digest_item]
@@ -71,13 +87,17 @@ class Plugin(PluginInterface):
         plugin_state_q = Query().plugin_id == self.id
         _d: Any = database_manager.plugin_states.get(plugin_state_q)  # type: ignore
         data: dict[str, Any] = (
-            _d if _d is not None else {"plugin_id": self.id, "state": []}
+            _d
+            if _d is not None
+            else {
+                "plugin_id": self.id,
+                "state": {"cutoff_timestamp": time.localtime(), "channels": {}},
+            }
         )
-        state: list[ItemDict] = data["state"]
+        state = data["state"]
 
         items_as_dicts = list(map(item_to_dict, items))
-        state += items_as_dicts
-        state = remove_duplicates_by_key(state, "link")
+        state["channels"][source_id] = items_as_dicts
 
         database_manager.plugin_states.upsert(  # type: ignore
             {"plugin_id": self.id, "state": state}, plugin_state_q
