@@ -26,8 +26,6 @@ class Plugin(PluginInterface):
             raise Exception(f"[MapItemPlugin#{self.id}] can not be scheduled")
 
         expr = f"map(lambda item: {self.map_expr}, input_feed)"
-        print("expr:")
-        print(expr)
         ret = list(eval(expr, {"input_feed": items, "set_field": set_field}))
         print(f"[MapItemPlugin#{self.id}] process returning items, n={len(ret)}")
         return ret

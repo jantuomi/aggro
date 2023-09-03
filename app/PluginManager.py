@@ -17,7 +17,7 @@ class PluginManager:
         self.config = config
 
     def load_plugin(self, plugin_name: str) -> None:
-        module: ModuleType = importlib.import_module(f"app.{plugin_name}")
+        module: ModuleType = importlib.import_module(f"plugins.{plugin_name}")
         plugin_class = module.Plugin
         self._plugins[plugin_name] = plugin_class
 
