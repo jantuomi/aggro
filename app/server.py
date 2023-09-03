@@ -2,7 +2,7 @@ from typing import Any
 import bottle as _bottle  # type: ignore
 from tinydb import Query
 
-from app.database import database_manager
+from app.DatabaseManager import database_manager
 
 bottle: Any = _bottle
 
@@ -13,7 +13,7 @@ def index(feed_id: str):
         raise Exception("Database is not initialized")
 
     Q = Query()
-    res = database_manager.db.search(Q.feed_id == feed_id)
+    res = database_manager.feeds.search(Q.feed_id == feed_id)
     if len(res) == 0:
         bottle.abort(400, f"No feed found with id {feed_id}")
 

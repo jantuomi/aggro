@@ -1,13 +1,17 @@
 import json
 import os
+import hashlib
 
 # from multiprocessing import Process
 from threading import Thread
 import time
+from typing import Any
+
+from tinydb import Query
 from app.AggroConfig import AggroConfig
 from app.MemoryState import memory_state
 from app.PluginManager import PluginManager
-from app.database import database_manager
+from app.DatabaseManager import database_manager
 from app.server import run_web_server
 
 
@@ -29,17 +33,44 @@ if __name__ == "__main__":
     aggrofile_path = os.environ.get("AGGRO_CONFIG_PATH", "Aggrofile")
 
     with open(aggrofile_path) as f:
-        aggrofile_content = json.loads(f.read())
+        aggrofile_content = f.read()
+        aggrofile = json.loads(aggrofile_content)
 
     aggro_config = AggroConfig(
-        server_host=aggrofile_content.get("server_host", "localhost"),
-        server_port=aggrofile_content.get("server_port", 8080),
-        db_path=aggrofile_content.get("db_path", "db.json"),
-        plugins=aggrofile_content["plugins"],
-        graph=aggrofile_content["graph"],
+        server_host=aggrofile.get("server_host", "localhost"),
+        server_port=aggrofile.get("server_port", 8080),
+        db_path=aggrofile.get("db_path", "db.json"),
+        plugins=aggrofile["plugins"],
+        graph=aggrofile["graph"],
     )
 
     database_manager.setup(aggro_config)
+
+    aggrofile_hash_q = Query().key == "aggrofile_hash"
+    aggrofile_stored_hash: str | None
+    if database_manager.meta_info.contains(aggrofile_hash_q):
+        aggrofile_stored_hash_obj: Any = database_manager.meta_info.get(  # type: ignore
+            aggrofile_hash_q
+        )
+        aggrofile_stored_hash = aggrofile_stored_hash_obj["value"]
+    else:
+        aggrofile_stored_hash = None
+
+    aggrofile_current_hash = hashlib.sha256(aggrofile_content.encode("utf-8"))
+    aggrofile_current_hash_dig = aggrofile_current_hash.hexdigest()
+
+    if (
+        aggrofile_stored_hash is not None
+        and aggrofile_stored_hash != aggrofile_current_hash_dig
+    ):
+        # Aggrofile has been changed
+        print("Aggrofile has been changed. Truncating plugin states in DB...")
+        database_manager.plugin_states.truncate()
+
+    database_manager.meta_info.upsert(  # type: ignore
+        {"key": "aggrofile_hash", "value": aggrofile_current_hash_dig},
+        aggrofile_hash_q,
+    )
 
     manager = PluginManager(aggro_config)
     manager.build_plugin_instances()

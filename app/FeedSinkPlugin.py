@@ -6,7 +6,7 @@ from tinydb import Query
 from app.Item import Item
 from app.PluginInterface import PluginInterface
 from app.utils import get_param
-from app.database import database_manager
+from app.DatabaseManager import database_manager
 
 
 class Plugin(PluginInterface):
@@ -52,6 +52,6 @@ class Plugin(PluginInterface):
         ret = self.build_xml(items)
 
         Q = Query()
-        database_manager.db.upsert({"feed_id": self.feed_id, "feed_xml": ret}, Q.feed_id == self.feed_id)  # type: ignore
+        database_manager.feeds.upsert({"feed_id": self.feed_id, "feed_xml": ret}, Q.feed_id == self.feed_id)  # type: ignore
         print(f"[FeedSinkPlugin#{self.id}] processed")
         return []
