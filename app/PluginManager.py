@@ -4,7 +4,7 @@ import time
 from types import ModuleType
 from typing import Any
 from app.Item import Item
-from app.PluginInterface import PluginInterface
+from app.PluginInterface import Params, PluginInterface
 from app.AggroConfig import AggroConfig
 from app.utils import get_param
 from app.MemoryState import memory_state
@@ -42,7 +42,7 @@ class PluginManager:
     def build_plugin_instances(self):
         self.graph: dict[str, PluginInterface] = {}
         for id in self.config.plugins:
-            params: dict[str, str] = self.config.plugins[id]
+            params: Params = self.config.plugins[id]
 
             plugin_name = get_param("plugin", params)
             schedule_expr: str | None = params.get("schedule_expr", None)

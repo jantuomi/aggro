@@ -1,3 +1,4 @@
+import time
 from typing import Any
 import xml.etree.ElementTree as ET
 
@@ -32,12 +33,40 @@ class Plugin(PluginInterface):
 
         for item in items:
             item_elem = ET.SubElement(channel, "item")
-            item_title = ET.SubElement(item_elem, "title")
-            item_title.text = item.title
-            item_link = ET.SubElement(item_elem, "link")
-            item_link.text = item.link
-            item_description = ET.SubElement(item_elem, "description")
-            item_description.text = item.description
+            if item.title is not None:
+                item_title = ET.SubElement(item_elem, "title")
+                item_title.text = item.title
+            if item.link is not None:
+                item_link = ET.SubElement(item_elem, "link")
+                item_link.text = item.link
+            if item.description is not None:
+                item_description = ET.SubElement(item_elem, "description")
+                item_description.text = item.description
+            if item.category is not None:
+                item_category = ET.SubElement(item_elem, "category")
+                item_category.text = item.category
+            if item.comments is not None:
+                item_comments = ET.SubElement(item_elem, "comments")
+                item_comments.text = item.comments
+            if item.pub_date is not None:
+                item_pub_date = ET.SubElement(item_elem, "pubDate")
+                item_pub_date.text = time.strftime(
+                    "%a, %d %b %Y %H:%M:%S +0000", item.pub_date
+                )
+            if item.author is not None:
+                item_author = ET.SubElement(item_elem, "author")
+                item_author.text = item.author
+
+            for enc in item.enclosures:
+                ET.SubElement(
+                    item_elem,
+                    "enclosure",
+                    {
+                        "length": enc.length,
+                        "type": enc.type,
+                        "url": enc.url,
+                    },
+                )
 
         return ET.tostring(rss, "unicode")
 

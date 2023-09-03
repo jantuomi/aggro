@@ -1,11 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import TypeAlias
 
 from app.Item import Item
 
+Params: TypeAlias = dict[str, str]
+
 
 class PluginInterface(ABC):
-    def __init__(self, id: str, params: dict[str, Any]):
+    def __init__(self, id: str, params: Params):
         self.id = id
         self.params = params
 
