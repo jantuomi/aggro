@@ -11,6 +11,9 @@
             "schedule_expr": "schedule.every(10).seconds",
             "feed_url": "https://feeds.feedburner.com/mariusschulz"
         },
+        "concat": {
+            "plugin": "ConcatPlugin"
+        },
         "title_filter": {
             "plugin": "FilterPlugin",
             "filter_expr": "'TypeScript' in item.title"
@@ -24,9 +27,12 @@
     },
     "graph": {
         "juusomikkonen_blog_rss": [
-            "title_filter"
+            "concat"
         ],
         "mariusschulz_blog_atom": [
+            "concat"
+        ],
+        "concat": [
             "title_filter"
         ],
         "title_filter": [

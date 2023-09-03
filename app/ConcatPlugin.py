@@ -6,8 +6,6 @@ from app.PluginInterface import PluginInterface
 from app.DatabaseManager import database_manager
 from app.utils import dict_to_item, item_to_dict
 
-# TODO
-
 
 class Plugin(PluginInterface):
     def __init__(self, id: str, params: dict[str, Any]) -> None:
@@ -19,23 +17,23 @@ class Plugin(PluginInterface):
         if source_id is None:
             raise Exception(f"[ConcatPlugin#{self.id}] can not be scheduled")
 
-        Q = Query()
-        q_result = database_manager.plugin_states.search(Q.plugin_id == self.id)
-        if len(q_result) > 1:
-            raise Exception(
-                f"[ConcatPlugin#{self.id}] invalid database state, found more than 1 plugin state: {len(q_result)}"
-            )
+        plugin_state_q = Query().plugin_id == self.id
+        _d: Any = database_manager.plugin_states.get(plugin_state_q)  # type: ignore
+        data: dict[str, Any] = (
+            _d if _d is not None else {"plugin_id": self.id, "state": {}}
+        )
+        state = data["state"]
 
-        d: Any = q_result[0] if len(q_result) == 1 else {}
-        data: dict[str, list[dict[str, str]]] = d
+        items_as_dicts = list(map(item_to_dict, items))
+        state[source_id] = items_as_dicts
 
-        if source_id in data:
-            items_as_dicts = list(map(item_to_dict, items))
-            d[source_id] = items_as_dicts
+        database_manager.plugin_states.upsert(  # type: ignore
+            {"plugin_id": self.id, "state": state}, plugin_state_q
+        )
 
         aggregated_item_dicts: list[dict[str, str]] = []
-        for data_source_id in data:
-            item_dicts = data[data_source_id]
+        for data_source_id in state:
+            item_dicts = state[data_source_id]
             aggregated_item_dicts += item_dicts
 
         ret = list(map(dict_to_item, aggregated_item_dicts))

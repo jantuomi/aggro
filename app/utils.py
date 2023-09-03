@@ -1,4 +1,5 @@
 from app.Item import Item
+from dataclasses import asdict
 
 
 def get_param(key: str, params: dict[str, str]) -> str:
@@ -9,8 +10,8 @@ def get_param(key: str, params: dict[str, str]) -> str:
 
 
 def item_to_dict(item: Item) -> dict[str, str]:
-    raise NotImplemented()
+    return asdict(item)
 
 
 def dict_to_item(d: dict[str, str]) -> Item:
-    raise NotImplemented()
+    return Item(**d)
