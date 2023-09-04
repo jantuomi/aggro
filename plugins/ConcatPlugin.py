@@ -1,5 +1,5 @@
 from typing import Any
-import time
+from datetime import datetime
 
 from tinydb import Query
 from app.Item import Item
@@ -13,9 +13,9 @@ class Plugin(PluginInterface):
         super().__init__(id, params)
         print(f"[ConcatPlugin#{self.id}] initialized")
 
-    def item_sort_key(self, item: Item) -> time.struct_time:
+    def item_sort_key(self, item: Item) -> datetime:
         if item.pub_date is None:
-            return time.localtime()
+            return datetime.now()
 
         return item.pub_date
 

@@ -19,11 +19,12 @@
             "plugin": "MapPlugin",
             "map_expr": "set_field(item, 'author', 'Marius Schulz')"
         },
-        "mariusschulz_digest": {
+        "typescript_digest": {
             "plugin": "DigestPlugin",
-            "schedule_expr": "schedule.every(30).seconds",
-            "digest_title": "Marius Schulz digest",
-            "digest_description": "Marius Schulz digest"
+            "from_datetime": "2010-01-01T00:00:00Z",
+            "interval": "2m",
+            "max_length": 1000,
+            "digest_title_prefix": "Only Typescript Bimonthly"
         },
         "concat": {
             "plugin": "ConcatPlugin"
@@ -32,17 +33,11 @@
             "plugin": "FilterPlugin",
             "filter_expr": "'TypeScript' in item.title"
         },
-        "output_feed": {
+        "typescript_digest_feed": {
             "plugin": "FeedSinkPlugin",
-            "feed_id": "test_feed",
-            "feed_title": "Only Typescript posts",
-            "feed_description": "Feed where all posts have Typescript in the title"
-        },
-        "mariusschulz_digest_feed": {
-            "plugin": "FeedSinkPlugin",
-            "feed_id": "marius_digest_feed",
-            "feed_title": "Marius Schulz digest",
-            "feed_description": "Marius Schulz digest"
+            "feed_id": "typescript_digest",
+            "feed_title": "Only Typescript Digest",
+            "feed_description": "Bimonthly digest where all posts have Typescript in the title"
         }
     },
     "graph": {
@@ -56,17 +51,16 @@
             "mariusschulz_add_author"
         ],
         "mariusschulz_add_author": [
-            "concat",
-            "mariusschulz_digest"
+            "concat"
         ],
         "concat": [
             "title_filter"
         ],
         "title_filter": [
-            "output_feed"
+            "typescript_digest"
         ],
-        "mariusschulz_digest": [
-            "mariusschulz_digest_feed"
+        "typescript_digest": [
+            "typescript_digest_feed"
         ]
     }
 }

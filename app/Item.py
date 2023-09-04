@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-import time
+from datetime import datetime
 
 
 @dataclass
@@ -19,7 +19,8 @@ class Item:
     link: str | None
     description: str | None
     author: str | None
-    pub_date: time.struct_time | None
+    pub_date: datetime | None
     category: str | None
     comments: str | None
     enclosures: list[ItemEnclosure]
+    guid: str

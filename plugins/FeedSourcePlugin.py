@@ -1,8 +1,17 @@
 import feedparser  # type: ignore
+import time
+from datetime import datetime, timezone
 from typing import Any
 from app.Item import Item, ItemEnclosure
 from app.PluginInterface import Params, PluginInterface
 from app.utils import ItemDict, get_param
+
+
+def struct_time_to_utc_datetime(struct_time: time.struct_time) -> datetime:
+    timestamp = time.mktime(struct_time)
+    naive_datetime = datetime.fromtimestamp(timestamp)
+    aware_datetime = naive_datetime.replace(tzinfo=timezone.utc)
+    return aware_datetime
 
 
 class Plugin(PluginInterface):
@@ -39,16 +48,25 @@ class Plugin(PluginInterface):
                     )
                 )
 
+            datetime_1970: datetime = datetime.fromtimestamp(0)
+            published_time_struct: Any = d["published_parsed"]
+            published_datetime = (
+                struct_time_to_utc_datetime(published_time_struct)
+                if published_time_struct
+                else datetime_1970
+            )
+
             result_items.append(
                 Item(
                     title=d.get("title", None),  # type: ignore
-                    link=d.get("link", None),  # type: ignore
+                    link=d["link"],  # type: ignore
                     description=d.get("description", None),  # type: ignore
                     author=d.get("author", None),  # type: ignore
-                    pub_date=d.get("published_parsed", None),  # type: ignore
+                    pub_date=published_datetime,
                     category=d.get("category", None),  # type: ignore
                     comments=d.get("comments"),  # type: ignore
                     enclosures=item_enclosures,
+                    guid=d["link"],  # type: ignore
                 )
             )
 

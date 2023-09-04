@@ -1,4 +1,3 @@
-import time
 from typing import Any
 import xml.etree.ElementTree as ET
 
@@ -50,12 +49,15 @@ class Plugin(PluginInterface):
                 item_comments.text = item.comments
             if item.pub_date is not None:
                 item_pub_date = ET.SubElement(item_elem, "pubDate")
-                item_pub_date.text = time.strftime(
-                    "%a, %d %b %Y %H:%M:%S +0000", item.pub_date
+                item_pub_date.text = item.pub_date.strftime(
+                    "%a, %d %b %Y %H:%M:%S +0000"
                 )
             if item.author is not None:
                 item_author = ET.SubElement(item_elem, "author")
                 item_author.text = item.author
+
+            item_guid = ET.SubElement(item_elem, "guid")
+            item_guid.text = item.guid
 
             for enc in item.enclosures:
                 ET.SubElement(
