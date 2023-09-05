@@ -25,7 +25,7 @@ class Plugin(PluginInterface):
         print(f"[FeedSourcePlugin#{self.id}] process called")
         if source_id is not None:
             raise Exception(
-                f"FeedSourcePlugin#{self.id} can only be scheduled, trying to process items from ItemSource {source_id}"
+                f"FeedSourcePlugin#{self.id} can only be scheduled, trying to process items from source {source_id}"
             )
 
         feed: Any = feedparser.parse(self.feed_url)  # type: ignore

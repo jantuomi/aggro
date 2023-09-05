@@ -1,5 +1,10 @@
 bottle==0.12.25
+certifi==2023.7.22
+charset-normalizer==3.2.0
 feedparser==6.0.10
+idna==3.4
+requests==2.31.0
 schedule==1.2.0
 sgmllib3k==1.0.0
 tinydb==4.8.0
+urllib3==2.0.4

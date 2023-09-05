@@ -1,6 +1,21 @@
 {
     "db_path": "db.json",
     "plugins": {
+        "plutonium74_fb": {
+            "plugin": "FacebookSourcePlugin",
+            "schedule_expr": "schedule.every(30).seconds",
+            "login_email": "",
+            "login_password": "",
+            "page_id": "Batushkaband",
+            "limit": 10,
+            "__comment": "https://www.facebook.com/Plutonium74"
+        },
+        "plutonium74_fb_feed": {
+            "plugin": "FeedSinkPlugin",
+            "feed_id": "plutonium74_fb",
+            "feed_title": "Plutonium74 FB",
+            "feed_description": "Plutonium74 FB posts"
+        },
         "juusomikkonen_blog_rss": {
             "plugin": "FeedSourcePlugin",
             "schedule_expr": "schedule.every(10).seconds",
@@ -61,6 +76,9 @@
         ],
         "typescript_digest": [
             "typescript_digest_feed"
+        ],
+        "plutonium74_fb": [
+            "plutonium74_fb_feed"
         ]
     }
 }
