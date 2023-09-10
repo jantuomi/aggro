@@ -83,7 +83,7 @@ def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> lis
         if cookie_page_resp.status_code >= 400:
             raise Exception(cookie_page_resp.text)
 
-        cookie_page = BeautifulSoup(cookie_page_resp.text, features="xml")
+        cookie_page = BeautifulSoup(cookie_page_resp.text, features=["xml", "lxml"])
         lsd: str = cookie_page.find("input", {"name": "lsd"})["value"]  # type: ignore
         jazoest: str = cookie_page.find("input", {"name": "jazoest"})["value"]  # type: ignore
 
@@ -106,7 +106,7 @@ def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> lis
         if login_page_resp.status_code >= 400:
             raise Exception(login_page_resp.text)
 
-        login_page = BeautifulSoup(login_page_resp.text, features="lxml")
+        login_page = BeautifulSoup(login_page_resp.text, features=["xml", "lxml"])
 
         lsd: str = login_page.find("input", {"name": "lsd"})["value"]  # type: ignore
         jazoest: str = login_page.find("input", {"name": "jazoest"})["value"]  # type: ignore
@@ -158,7 +158,7 @@ def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> lis
             if timeline_resp.status_code >= 400:
                 raise Exception(timeline_resp.text)
 
-            timeline = BeautifulSoup(timeline_resp.text, features="lxml")
+            timeline = BeautifulSoup(timeline_resp.text, features=["xml", "lxml"])
             posts = timeline.select("section > article")
 
             for post in posts:

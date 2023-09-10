@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  aggro:
+    image: registry.digitalocean.com/jan-systems-registry/aggro:latest
+    build:
+      context: .
+    ports:
+      - 8080:8080
+    volumes:
+      - ${PWD}/db.json:/app/db.json
+      - ${PWD}/.env:/app/.env
+      - ${PWD}/Aggrofile:/app/Aggrofile

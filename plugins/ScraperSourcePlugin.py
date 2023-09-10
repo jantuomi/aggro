@@ -46,7 +46,7 @@ class Plugin(PluginInterface):
         result_items: list[Item] = []
         with requests.session() as session:
             page_resp = session.get(self.url, allow_redirects=True)
-            page_elem = BeautifulSoup(page_resp.text)
+            page_elem = BeautifulSoup(page_resp.text, features="lxml")
             post_elems = eval(self.selector_post, {"page": page_elem})
 
             for post_elem in post_elems:
@@ -64,7 +64,9 @@ class Plugin(PluginInterface):
                     detail_page_resp = session.get(
                         detail_page_url, allow_redirects=True
                     )
-                    detail_page_elem = BeautifulSoup(detail_page_resp.text)
+                    detail_page_elem = BeautifulSoup(
+                        detail_page_resp.text, features="lxml"
+                    )
                     guid = detail_page_url
                 else:
                     detail_page_elem = None
@@ -79,7 +81,7 @@ class Plugin(PluginInterface):
                             "detail_page": detail_page_elem,
                         },
                     )[0]
-                    title = title_elem.get_text()
+                    title = title_elem.get_text().strip()
                 else:
                     title = None
 
@@ -92,7 +94,7 @@ class Plugin(PluginInterface):
                             "detail_page": detail_page_elem,
                         },
                     )[0]
-                    description = str(description_elem)
+                    description = str(description_elem).strip()
                 else:
                     description = None
 
@@ -105,7 +107,7 @@ class Plugin(PluginInterface):
                             "detail_page": detail_page_elem,
                         },
                     )[0]
-                    date = date_elem.get_text()
+                    date = date_elem.get_text().strip()
                 else:
                     date = None
 
@@ -118,7 +120,7 @@ class Plugin(PluginInterface):
                             "detail_page": detail_page_elem,
                         },
                     )[0]
-                    author = author_elem.get_text()
+                    author = author_elem.get_text().strip()
                 else:
                     author = None
 

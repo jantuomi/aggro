@@ -1,5 +1,7 @@
 {
     "db_path": "db.json",
+    "server_host": "0.0.0.0",
+    "server_port": 8080,
     "plugins": {
         "plutonium74_fb": {
             "plugin": "FacebookSourcePlugin",
