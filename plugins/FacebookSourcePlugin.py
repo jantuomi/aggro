@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup, Tag
 from app.Item import Item
 from app.PluginInterface import Params, PluginInterface
-from app.utils import get_param
+from app.utils import get_config, get_config_or_default
 
 
 def replace_lm_links(text: str) -> str:
@@ -201,10 +201,10 @@ def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> lis
 class Plugin(PluginInterface):
     def __init__(self, id: str, params: Params) -> None:
         super().__init__(id, params)
-        self.login_email = get_param("login_email", params)
-        self.login_password = get_param("login_password", params)
-        self.page_id = get_param("page_id", params)
-        self.limit = int(params.get("limit", "10"))
+        self.login_email = get_config(params, "login_email")
+        self.login_password = get_config(params, "login_password")
+        self.page_id = get_config(params, "page_id")
+        self.limit = int(get_config_or_default(params, "limit", "10"))
 
         print(f"[FacebookSourcePlugin#{self.id}] initialized")
 

@@ -2,7 +2,7 @@ from dataclasses import fields
 from typing import Any
 from app.Item import Item
 from app.PluginInterface import Params, PluginInterface
-from app.utils import get_param
+from app.utils import get_config
 
 
 def set_field(item: Item, k: str, v: Any):
@@ -17,7 +17,7 @@ def set_field(item: Item, k: str, v: Any):
 class Plugin(PluginInterface):
     def __init__(self, id: str, params: Params) -> None:
         super().__init__(id, params)
-        self.map_expr: str = get_param("map_expr", params)
+        self.map_expr: str = get_config(params, "map_expr")
         print(f"[MapItemPlugin#{self.id}] initialized")
 
     def process(self, source_id: str | None, items: list[Item]) -> list[Item]:

@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import Any
 from app.Item import Item, ItemEnclosure
 from app.PluginInterface import Params, PluginInterface
-from app.utils import ItemDict, get_param
+from app.utils import ItemDict, get_config
 
 
 def struct_time_to_utc_datetime(struct_time: time.struct_time) -> datetime:
@@ -17,7 +17,7 @@ def struct_time_to_utc_datetime(struct_time: time.struct_time) -> datetime:
 class Plugin(PluginInterface):
     def __init__(self, id: str, params: Params) -> None:
         super().__init__(id, params)
-        self.feed_url: str = get_param("feed_url", params)
+        self.feed_url: str = get_config(params, "feed_url")
 
         print(f"[FeedSourcePlugin#{self.id}] initialized")
 

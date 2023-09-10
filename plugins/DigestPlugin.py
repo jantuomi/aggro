@@ -7,7 +7,7 @@ from tinydb import Query
 from app.Item import Item
 from app.PluginInterface import Params, PluginInterface
 from app.DatabaseManager import database_manager
-from app.utils import dict_to_item, get_param, item_to_dict
+from app.utils import dict_to_item, get_config_or_default, item_to_dict, get_config
 
 
 def add_days(start: datetime, days: int):
@@ -99,14 +99,16 @@ def parse_interval(interval: str) -> tuple[int, str]:
 class Plugin(PluginInterface):
     def __init__(self, id: str, params: Params) -> None:
         super().__init__(id, params)
-        self.digest_title_prefix = get_param("digest_title_prefix", params)
-        self.digest_description = params.get("digest_description", None)
-        self.digest_link = params.get("digest_link", None)
-        from_datatime_str = get_param("from_datetime", params)
+        self.digest_title_prefix = get_config(params, "digest_title_prefix")
+        self.digest_description = get_config_or_default(
+            params, "digest_description", None
+        )
+        self.digest_link = get_config_or_default(params, "digest_link", None)
+        from_datatime_str = get_config(params, "from_datetime")
         self.from_datetime = datetime.fromisoformat(from_datatime_str)
-        interval = get_param("interval", params)
+        interval = get_config(params, "interval")
         self.interval_pair = parse_interval(interval)
-        self.max_length = int(params.get("max_length", "1000"))
+        self.max_length = int(get_config_or_default(params, "max_length", "1000"))
         print(f"[DigestPlugin#{self.id}] initialized")
 
     def process(self, source_id: str | None, items: list[Item]) -> list[Item]:

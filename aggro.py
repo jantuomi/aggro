@@ -1,8 +1,7 @@
 import json
 import os
 import hashlib
-
-# from multiprocessing import Process
+from dotenv import load_dotenv
 from threading import Thread
 import time
 from typing import Any
@@ -13,6 +12,9 @@ from app.MemoryState import memory_state
 from app.PluginManager import PluginManager
 from app.DatabaseManager import database_manager
 from app.server import run_web_server
+from app.utils import get_config, get_config_or_default
+
+load_dotenv()
 
 
 def run_plugin_thread(manager: PluginManager, config: AggroConfig):
@@ -37,11 +39,11 @@ if __name__ == "__main__":
         aggrofile = json.loads(aggrofile_content)
 
     aggro_config = AggroConfig(
-        server_host=aggrofile.get("server_host", "localhost"),
-        server_port=aggrofile.get("server_port", 8080),
-        db_path=aggrofile.get("db_path", "db.json"),
-        plugins=aggrofile["plugins"],
-        graph=aggrofile["graph"],
+        server_host=get_config_or_default(aggrofile, "server_host", "localhost"),
+        server_port=get_config_or_default(aggrofile, "server_port", 8080),
+        db_path=get_config_or_default(aggrofile, "db_path", "db.json"),
+        plugins=get_config(aggrofile, "plugins"),
+        graph=get_config(aggrofile, "graph"),
     )
 
     database_manager.setup(aggro_config)

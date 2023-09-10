@@ -4,8 +4,8 @@
         "plutonium74_fb": {
             "plugin": "FacebookSourcePlugin",
             "schedule_expr": "schedule.every(30).seconds",
-            "login_email": "",
-            "login_password": "",
+            "login_email": "${AGGRO_FB_LOGIN_EMAIL}",
+            "login_password": "${AGGRO_FB_LOGIN_PASSWORD}",
             "page_id": "Batushkaband",
             "limit": 10,
             "__comment": "https://www.facebook.com/Plutonium74"

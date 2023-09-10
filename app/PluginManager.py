@@ -6,7 +6,7 @@ from typing import Any
 from app.Item import Item
 from app.PluginInterface import Params, PluginInterface
 from app.AggroConfig import AggroConfig
-from app.utils import get_param
+from app.utils import get_config
 from app.MemoryState import memory_state
 
 
@@ -44,7 +44,7 @@ class PluginManager:
         for id in self.config.plugins:
             params: Params = self.config.plugins[id]
 
-            plugin_name = get_param("plugin", params)
+            plugin_name: str = get_config(params, "plugin")
             schedule_expr: str | None = params.get("schedule_expr", None)
 
             if plugin_name not in self._plugins:

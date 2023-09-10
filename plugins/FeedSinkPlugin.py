@@ -5,17 +5,17 @@ from tinydb import Query
 
 from app.Item import Item
 from app.PluginInterface import PluginInterface
-from app.utils import get_param
+from app.utils import get_config, get_config_or_default
 from app.DatabaseManager import database_manager
 
 
 class Plugin(PluginInterface):
     def __init__(self, id: str, params: dict[str, Any]) -> None:
         super().__init__(id, params)
-        self.feed_id: str = get_param("feed_id", params)
-        self.feed_title: str = get_param("feed_title", params)
-        self.feed_link: str | None = params.get("feed_link", None)
-        self.feed_description: str = get_param("feed_description", params)
+        self.feed_id: str = get_config(params, "feed_id")
+        self.feed_title: str = get_config(params, "feed_title")
+        self.feed_link: str | None = get_config_or_default(params, "feed_link", None)
+        self.feed_description: str = get_config(params, "feed_description")
         print(f"[FeedSinkPlugin#{self.id}] initialized")
         print(f"[FeedSinkPlugin#{self.id}] feed will be served at path /{self.feed_id}")
 

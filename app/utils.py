@@ -1,19 +1,36 @@
+import os
 from datetime import datetime
-from typing import TypeAlias, Union
+from typing import Any, TypeAlias, Union
 from app.Item import Item
 from dataclasses import asdict
-
-from app.PluginInterface import Params
 
 ItemDictValue: TypeAlias = Union[str, dict[str, "ItemDictValue"], list["ItemDictValue"]]
 ItemDict: TypeAlias = dict[str, ItemDictValue]
 
 
-def get_param(key: str, params: Params) -> str:
-    if key not in params:
-        raise Exception(f"no {key} field in config entry: " + str(params))
+def evaluate_env_ref(v: Any) -> str:
+    if type(v) == str and v.startswith("${") and v.endswith("}"):
+        return os.environ[v[2:-1]]  # type: ignore
+    else:
+        return v
 
-    return params[key]
+
+def get_config(config: dict[str, Any], key: str) -> Any:
+    v: Any
+    try:
+        v = config[key]
+    except KeyError:
+        raise Exception(f"no {key} field in config: " + str(config))
+
+    return evaluate_env_ref(v)
+
+
+def get_config_or_default(
+    config: dict[str, Any], key: str, default: Any | None = None
+) -> Any:
+    v: Any = config.get(key, default)
+
+    return evaluate_env_ref(v)
 
 
 def item_to_dict(item: Item) -> ItemDict:

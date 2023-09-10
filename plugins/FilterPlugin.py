@@ -1,12 +1,12 @@
 from app.Item import Item
 from app.PluginInterface import Params, PluginInterface
-from app.utils import get_param
+from app.utils import get_config
 
 
 class Plugin(PluginInterface):
     def __init__(self, id: str, params: Params) -> None:
         super().__init__(id, params)
-        self.filter_expr: str = get_param("filter_expr", params)
+        self.filter_expr: str = get_config(params, "filter_expr")
         print(f"[FilterPlugin#{self.id}] initialized")
 
     def process(self, source_id: str | None, items: list[Item]) -> list[Item]:
