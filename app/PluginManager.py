@@ -15,6 +15,7 @@ class PluginManager:
         self._plugins: dict[str, Any] = {}
         self.plugin_instances: dict[str, PluginInterface] = {}
         self.config = config
+        self.scheduled_plugin_ids: list[str] = []
 
     def load_plugin(self, plugin_name: str) -> None:
         module: ModuleType = importlib.import_module(f"plugins.{plugin_name}")
@@ -40,7 +41,6 @@ class PluginManager:
         self.propagate(id, ret_items)
 
     def build_plugin_instances(self):
-        self.graph: dict[str, PluginInterface] = {}
         for id in self.config.plugins:
             params: Params = self.config.plugins[id]
 
@@ -53,10 +53,15 @@ class PluginManager:
             if schedule_expr is not None:
                 job: schedule.Job = eval(schedule_expr, {"schedule": schedule})
                 job.do(self.run_plugin_job, id, None)  # type: ignore
+                self.scheduled_plugin_ids.append(id)
 
             PluginClass: Any = self._plugins[plugin_name]
             plugin: PluginInterface = PluginClass(id=id, params=params)
             self.plugin_instances[id] = plugin
+
+    def initial_run_scheduled_plugins(self):
+        for id in self.scheduled_plugin_ids:
+            self.run_plugin_job(id, None)
 
     def run(self) -> None:
         while memory_state.running:

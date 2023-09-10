@@ -79,6 +79,8 @@ if __name__ == "__main__":
 
     memory_state.running = True
 
+    manager.initial_run_scheduled_plugins()
+
     plugin_thread = Thread(target=run_plugin_thread, args=[manager, aggro_config])
     plugin_thread.start()
 
