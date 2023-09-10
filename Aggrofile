@@ -3,12 +3,28 @@
     "plugins": {
         "plutonium74_fb": {
             "plugin": "FacebookSourcePlugin",
-            "schedule_expr": "schedule.every(30).seconds",
+            "schedule_expr": "schedule.every(24).hours",
             "login_email": "${AGGRO_FB_LOGIN_EMAIL}",
             "login_password": "${AGGRO_FB_LOGIN_PASSWORD}",
-            "page_id": "Batushkaband",
+            "page_id": "Plutonium74",
             "limit": 10,
             "__comment": "https://www.facebook.com/Plutonium74"
+        },
+        "aaniwalli_scraper": {
+            "plugin": "ScraperSourcePlugin",
+            "schedule_expr": "schedule.every(10).seconds",
+            "url": "https://www.ääniwalli.fi/",
+            "selector_post": "page.select('article')",
+            "selector_title": "post.select('h1')",
+            "selector_date": "post.select('.date')",
+            "selector_link": "post.select('a.event-link')",
+            "selector_description": "detail_page.select('.event-page')"
+        },
+        "aaniwalli_feed": {
+            "plugin": "FeedSinkPlugin",
+            "feed_id": "aaniwalli",
+            "feed_title": "Ääniwalli",
+            "feed_description": "Ääniwalli events"
         },
         "plutonium74_fb_feed": {
             "plugin": "FeedSinkPlugin",
@@ -79,6 +95,9 @@
         ],
         "plutonium74_fb": [
             "plutonium74_fb_feed"
+        ],
+        "aaniwalli_scraper": [
+            "aaniwalli_feed"
         ]
     }
 }
