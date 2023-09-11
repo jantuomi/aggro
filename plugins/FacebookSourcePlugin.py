@@ -168,6 +168,7 @@ def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> lis
                 if link_tag is not None:
                     link = f"{base_url}{link_tag['href']}"
                     # drop tracking parameters that change at a whim
+                    link = link.split("&set")[0]
                     link = link.split("&eav")[0]
                 else:
                     link = None
