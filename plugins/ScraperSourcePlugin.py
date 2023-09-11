@@ -33,7 +33,7 @@ class Plugin(PluginInterface):
             params, "selector_image", None
         )
         self.show_image_in_description: bool = get_config_or_default(
-            params, "show_image_in_description", False
+            params, "show_image_in_description", True
         )
 
         print(f"[ScraperSourcePlugin#{self.id}] initialized")
