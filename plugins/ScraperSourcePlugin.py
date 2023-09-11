@@ -164,7 +164,7 @@ class Plugin(PluginInterface):
                     image_html = f'<img src="{image_src}"><br><br>'
                     if description and self.show_image_in_description:
                         description = image_html + description
-                    else:
+                    elif description is None:
                         description = image_html
 
                     media_content = ItemMediaContent(
