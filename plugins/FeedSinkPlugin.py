@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 import xml.etree.ElementTree as ET
 
@@ -37,15 +38,6 @@ class Plugin(PluginInterface):
         description = ET.SubElement(channel, "description")
         description.text = self.feed_description
 
-        # TODO favicons
-        # <image>
-        # <link>https://www.aaniwalli.fi/</link>
-        # <url>
-        # https://www.google.com/s2/favicons?domain=https://www.aaniwalli.fi
-        # </url>
-        # <title>Ääniwalli</title>
-        # </image>
-
         if favicon_url is not None:
             favicon_image_elem = ET.SubElement(channel, "image")
             favicon_link_elem = ET.SubElement(favicon_image_elem, "link")
@@ -54,6 +46,13 @@ class Plugin(PluginInterface):
             favicon_url_elem.text = favicon_url
             favicon_title_elem = ET.SubElement(favicon_image_elem, "title")
             favicon_title_elem.text = self.feed_title
+
+        generator_elem = ET.SubElement(channel, "generator")
+        generator_elem.text = "https://github.com/jantuomi/aggro"
+
+        last_build_date_elem = ET.SubElement(channel, "lastBuildDate")
+        now = datetime.now()
+        last_build_date_elem.text = now.strftime("%a, %d %b %Y %H:%M:%S +0000")
 
         for item in items:
             item_elem = ET.SubElement(channel, "item")
@@ -104,7 +103,11 @@ class Plugin(PluginInterface):
                     },
                 )
 
-        return ET.tostring(rss, "unicode")
+        return {
+            "feed_id": self.feed_id,
+            "feed_xml": ET.tostring(rss, "unicode"),
+            "feed_last_build_date": last_build_date_elem.text,
+        }
 
     def process(self, source_id: str | None, items: list[Item]) -> list[Item]:
         print(f"[FeedSinkPlugin#{self.id}] process called, n={len(items)}")
@@ -117,6 +120,6 @@ class Plugin(PluginInterface):
         ret = self.build_xml(items)
 
         Q = Query()
-        database_manager.feeds.upsert({"feed_id": self.feed_id, "feed_xml": ret}, Q.feed_id == self.feed_id)  # type: ignore
+        database_manager.feeds.upsert(ret, Q.feed_id == self.feed_id)  # type: ignore
         print(f"[FeedSinkPlugin#{self.id}] processed")
         return []

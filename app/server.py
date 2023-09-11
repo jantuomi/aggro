@@ -5,16 +5,26 @@ from tinydb import Query
 from app.DatabaseManager import database_manager
 
 
-def feed_id_to_li(feed_id: str) -> str:
-    return f'<li><a href="/{feed_id}">{feed_id}</a></li>'
+def feed_id_to_td(feed_id: str) -> str:
+    return f'<td><a href="/{feed_id}">{feed_id}</a></td>'
 
 
-def feed_ids_to_ul(feed_ids: list[str]) -> str:
-    if len(feed_ids) == 0:
+def feed_last_build_date_to_td(last_build_date: str) -> str:
+    return f"<td>{last_build_date}</td>"
+
+
+def feed_to_tr(feed: dict[str, str]) -> str:
+    return f'<tr>{feed_id_to_td(feed["feed_id"])}{feed_last_build_date_to_td(feed.get("feed_last_build_date", ""))}</tr>'
+
+
+def feeds_to_table(feeds: list[dict[str, str]]) -> str:
+    if len(feeds) == 0:
         return "No feeds (yet). Add feeds by defining them in your Aggrofile. If you did that already, you might have to wait a bit for the data to propagate."
 
-    lis = [feed_id_to_li(feed_id) for feed_id in feed_ids]
-    return "<ul>" + "".join(lis) + "</ul>"
+    trs: list[str] = [feed_to_tr(feed) for feed in feeds]
+    thead = f"<thead><tr><td>Feed</td><td>Last build date</td></tr></thead>"
+    tbody = f'<tbody>{"".join(trs)}</tbody>'
+    return "<table>" + thead + tbody + "</table>"
 
 
 @bottle.route("/")
@@ -23,8 +33,7 @@ def index():
         raise Exception("Database is not initialized")
 
     Q = Query()
-    res = database_manager.feeds.all()
-    feeds_ids = [feed["feed_id"] for feed in res]
+    feeds = database_manager.feeds.all()
 
     bottle.response.set_header("content-type", "text/html")
     page = f"""
@@ -46,13 +55,25 @@ def index():
     h1 {{
         margin-bottom: 0;
     }}
+    table {{
+        width: 100%;
+        border-collapse: collapse;
+    }}
+
+    table, th, td {{
+        border: 1px solid #e0e0e0;
+    }}
+
+    th, td {{
+        padding: 8px;
+    }}
     </style>
     </head>
     <body>
         <h1>Aggro</h2>
         <i>Feed manipulator</i>
-        <h2>List of feeds served here</h2>
-        {feed_ids_to_ul(feeds_ids)}
+        <h2>Feeds served at this address</h2>
+        {feeds_to_table(feeds)}
     </body>
     </html>
     """
