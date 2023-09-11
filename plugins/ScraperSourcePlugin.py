@@ -32,6 +32,9 @@ class Plugin(PluginInterface):
         self.selector_image: str | None = get_config_or_default(
             params, "selector_image", None
         )
+        self.show_image_in_description: bool = get_config_or_default(
+            params, "show_image_in_description", False
+        )
 
         print(f"[ScraperSourcePlugin#{self.id}] initialized")
 
@@ -159,7 +162,7 @@ class Plugin(PluginInterface):
                 if image_src is not None:
                     image_src = self.absolute_link(image_src)
                     image_html = f'<img src="{image_src}"><br><br>'
-                    if description:
+                    if description and self.show_image_in_description:
                         description = image_html + description
                     else:
                         description = image_html
