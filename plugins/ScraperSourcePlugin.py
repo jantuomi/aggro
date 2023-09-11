@@ -47,9 +47,7 @@ class Plugin(PluginInterface):
         result_items: list[Item] = []
         with requests.session() as session:
             page_resp = session.get(self.url, allow_redirects=True)
-            page_elem = BeautifulSoup(
-                page_resp.text, features=["xml", "lxml", "lxml-xml"]
-            )
+            page_elem = BeautifulSoup(page_resp.text, "html.parser")
             post_elems = eval(self.selector_post, {"page": page_elem})
 
             for post_elem in post_elems:
@@ -67,7 +65,7 @@ class Plugin(PluginInterface):
                         detail_page_url, allow_redirects=True
                     )
                     detail_page_elem = BeautifulSoup(
-                        detail_page_resp.text, features=["xml", "lxml", "lxml-xml"]
+                        detail_page_resp.text, "html.parser"
                     )
                     guid = ItemGUID(detail_page_url, is_perma_link=True)
                 else:
