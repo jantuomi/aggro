@@ -31,6 +31,7 @@ def index():
     <html lang="en">
     <head>
     <title>Aggro &ndash; Feed manipulator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
     body {{
         font-family: Open Sans, Arial;
@@ -50,7 +51,7 @@ def index():
     <body>
         <h1>Aggro</h2>
         <i>Feed manipulator</i>
-        <h2>List of feeds served at this address</h2>
+        <h2>List of feeds served here</h2>
         {feed_ids_to_ul(feeds_ids)}
     </body>
     </html>
