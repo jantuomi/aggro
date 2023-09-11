@@ -56,8 +56,12 @@ class Plugin(PluginInterface):
                 item_author = ET.SubElement(item_elem, "author")
                 item_author.text = item.author
 
-            item_guid = ET.SubElement(item_elem, "guid")
-            item_guid.text = item.guid
+            item_guid = ET.SubElement(
+                item_elem,
+                "guid",
+                {"isPermaLink": "true" if item.guid.is_perma_link else "false"},
+            )
+            item_guid.text = item.guid.value
 
             for enc in item.enclosures:
                 ET.SubElement(

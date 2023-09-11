@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import re
 
 from tinydb import Query
-from app.Item import Item
+from app.Item import Item, ItemGUID
 from app.PluginInterface import Params, PluginInterface
 from app.DatabaseManager import database_manager
 from app.utils import dict_to_item, get_config_or_default, item_to_dict, get_config
@@ -183,7 +183,7 @@ class Plugin(PluginInterface):
                 category=None,
                 comments=None,
                 enclosures=[],
-                guid=f"aggro__{self.id}__{digest_pub_date.isoformat()}",
+                guid=ItemGUID(f"aggro__{self.id}__{digest_pub_date.isoformat()}"),
             )
 
             digest_items.append(digest_item)

@@ -20,7 +20,8 @@
             "selector_title": "post.select('h1')",
             "selector_date": "post.select('.date')",
             "selector_link": "post.select('a.event-link')",
-            "selector_description": "detail_page.select('.event-page')"
+            "selector_description": "detail_page.select('.event-page')",
+            "selector_image": "post.select('.event-link > .image')"
         },
         "aaniwalli_feed": {
             "plugin": "FeedSinkPlugin",

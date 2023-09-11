@@ -12,6 +12,14 @@ class ItemEnclosure:
 
 
 @dataclass
+class ItemGUID:
+    """RSS Item GUID object"""
+
+    value: str
+    is_perma_link: bool = False
+
+
+@dataclass
 class Item:
     """RSS Item"""
 
@@ -23,4 +31,4 @@ class Item:
     category: str | None
     comments: str | None
     enclosures: list[ItemEnclosure]
-    guid: str
+    guid: ItemGUID

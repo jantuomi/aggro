@@ -5,7 +5,7 @@ import re
 import urllib.parse
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup, Tag
-from app.Item import Item
+from app.Item import Item, ItemGUID
 from app.PluginInterface import Params, PluginInterface
 from app.utils import get_config, get_config_or_default
 
@@ -83,7 +83,9 @@ def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> lis
         if cookie_page_resp.status_code >= 400:
             raise Exception(cookie_page_resp.text)
 
-        cookie_page = BeautifulSoup(cookie_page_resp.text, features=["xml", "lxml"])
+        cookie_page = BeautifulSoup(
+            cookie_page_resp.text, features=["xml", "lxml", "lxml-xml"]
+        )
         lsd: str = cookie_page.find("input", {"name": "lsd"})["value"]  # type: ignore
         jazoest: str = cookie_page.find("input", {"name": "jazoest"})["value"]  # type: ignore
 
@@ -106,7 +108,9 @@ def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> lis
         if login_page_resp.status_code >= 400:
             raise Exception(login_page_resp.text)
 
-        login_page = BeautifulSoup(login_page_resp.text, features=["xml", "lxml"])
+        login_page = BeautifulSoup(
+            login_page_resp.text, features=["xml", "lxml", "lxml-xml"]
+        )
 
         lsd: str = login_page.find("input", {"name": "lsd"})["value"]  # type: ignore
         jazoest: str = login_page.find("input", {"name": "jazoest"})["value"]  # type: ignore
@@ -158,13 +162,22 @@ def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> lis
             if timeline_resp.status_code >= 400:
                 raise Exception(timeline_resp.text)
 
-            timeline = BeautifulSoup(timeline_resp.text, features=["xml", "lxml"])
+            timeline = BeautifulSoup(
+                timeline_resp.text, features=["xml", "lxml", "lxml-xml"]
+            )
             posts = timeline.select("section > article")
 
             for post in posts:
-                link_tag: Tag | None = post.find("a", string="Full Story")  # type: ignore
                 time_tag: Tag = post.find("abbr")  # type: ignore
-                link = f"{base_url}{link_tag['href']}" if link_tag is not None else None
+
+                link_tag: Tag | None = post.find("a", string="Full Story")  # type: ignore
+                if link_tag is not None:
+                    link = f"{base_url}{link_tag['href']}"
+                    # drop tracking parameters that change at a whim
+                    link = link.split("&eav")[0]
+                else:
+                    link = None
+
                 pub_date_str: str = time_tag.get_text()
                 pub_date = parse_custom_date(pub_date_str)
                 story_body_container = str(post.find("div"))
@@ -175,7 +188,10 @@ def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> lis
                     title=title,
                     description=story_body_container,
                     link=link,
-                    guid=link if link is not None else f"aggro__facebook__{title}",
+                    guid=ItemGUID(
+                        link if link is not None else f"aggro__facebook__{title}",
+                        is_perma_link=link is not None,
+                    ),
                     author=page_id,
                     category=None,
                     comments=None,

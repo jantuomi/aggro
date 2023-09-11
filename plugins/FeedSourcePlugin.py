@@ -2,7 +2,7 @@ import feedparser  # type: ignore
 import time
 from datetime import datetime, timezone
 from typing import Any
-from app.Item import Item, ItemEnclosure
+from app.Item import Item, ItemEnclosure, ItemGUID
 from app.PluginInterface import Params, PluginInterface
 from app.utils import ItemDict, get_config
 
@@ -56,17 +56,18 @@ class Plugin(PluginInterface):
                 else datetime_1970
             )
 
+            link: str = d["link"]  # type: ignore
             result_items.append(
                 Item(
                     title=d.get("title", None),  # type: ignore
-                    link=d["link"],  # type: ignore
+                    link=link,
                     description=d.get("description", None),  # type: ignore
                     author=d.get("author", None),  # type: ignore
                     pub_date=published_datetime,
                     category=d.get("category", None),  # type: ignore
                     comments=d.get("comments"),  # type: ignore
                     enclosures=item_enclosures,
-                    guid=d["link"],  # type: ignore
+                    guid=ItemGUID(link, is_perma_link=True),
                 )
             )
 
