@@ -184,6 +184,7 @@ class Plugin(PluginInterface):
                 comments=None,
                 enclosures=[],
                 guid=ItemGUID(f"aggro__{self.id}__{digest_pub_date.isoformat()}"),
+                media_content=None,
             )
 
             digest_items.append(digest_item)

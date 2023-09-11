@@ -192,6 +192,7 @@ def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> lis
                     comments=None,
                     enclosures=[],
                     pub_date=pub_date,
+                    media_content=None,
                 )
                 items.append(item)
 

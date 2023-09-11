@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Literal
 
 
 @dataclass
@@ -20,6 +21,14 @@ class ItemGUID:
 
 
 @dataclass
+class ItemMediaContent:
+    """RSS Item media:content object"""
+
+    url: str
+    medium: Literal["video", "image"]
+
+
+@dataclass
 class Item:
     """RSS Item"""
 
@@ -32,3 +41,4 @@ class Item:
     comments: str | None
     enclosures: list[ItemEnclosure]
     guid: ItemGUID
+    media_content: ItemMediaContent | None

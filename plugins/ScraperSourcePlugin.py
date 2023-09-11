@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import Any
 import re
 import requests
-from app.Item import Item, ItemEnclosure, ItemGUID
+from app.Item import Item, ItemEnclosure, ItemGUID, ItemMediaContent
 from app.PluginInterface import Params, PluginInterface
 from app.utils import ItemDict, get_config, get_config_or_default
 
@@ -158,11 +158,18 @@ class Plugin(PluginInterface):
 
                 if image_src is not None:
                     image_src = self.absolute_link(image_src)
-                    image_html = f'<br><br><img src="{image_src}">'
+                    image_html = f'<img src="{image_src}"><br><br>'
                     if description:
-                        description += image_html
+                        description = image_html + description
                     else:
                         description = image_html
+
+                    media_content = ItemMediaContent(
+                        url=image_src,
+                        medium="image",
+                    )
+                else:
+                    media_content = None
 
                 if description:
                     description = description.replace('src="/', f'src="{self.url}/')
@@ -172,12 +179,13 @@ class Plugin(PluginInterface):
                     title=f"{date} – {title}",
                     link=detail_page_url,
                     description=description,
-                    pub_date=datetime.now(),
+                    pub_date=None,  # TODO pub_date parsing
                     author=author,
                     category=None,
                     comments=None,
                     enclosures=[],
                     guid=guid,
+                    media_content=media_content,
                 )
                 result_items.append(item)
 

@@ -2,7 +2,7 @@ import feedparser  # type: ignore
 import time
 from datetime import datetime, timezone
 from typing import Any
-from app.Item import Item, ItemEnclosure, ItemGUID
+from app.Item import Item, ItemEnclosure, ItemGUID, ItemMediaContent
 from app.PluginInterface import Params, PluginInterface
 from app.utils import ItemDict, get_config
 
@@ -35,6 +35,15 @@ class Plugin(PluginInterface):
                 f"[FeedSourcePlugin#{self.id}] malformed XML in feed {self.feed_url}"
             )
 
+        if "image" in feed:
+            image_url = feed["image"]["href"]
+            media_content = ItemMediaContent(
+                url=image_url,
+                medium="image",
+            )
+        else:
+            media_content = None
+
         for _d in feed.entries:
             d: ItemDict = _d
             item_enclosures: list[ItemEnclosure] = []
@@ -57,6 +66,7 @@ class Plugin(PluginInterface):
             )
 
             link: str = d["link"]  # type: ignore
+
             result_items.append(
                 Item(
                     title=d.get("title", None),  # type: ignore
@@ -68,6 +78,7 @@ class Plugin(PluginInterface):
                     comments=d.get("comments"),  # type: ignore
                     enclosures=item_enclosures,
                     guid=ItemGUID(link, is_perma_link=True),
+                    media_content=media_content,
                 )
             )
 
