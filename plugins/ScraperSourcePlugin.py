@@ -138,6 +138,8 @@ class Plugin(PluginInterface):
                     )[0]
                     if image_elem.has_attr("src"):
                         image_src = image_elem["src"]
+                    elif image_elem.has_attr("href"):
+                        image_src = image_elem["href"]
                     elif (
                         image_elem.has_attr("style")
                         and "background-image:" in image_elem["style"]
