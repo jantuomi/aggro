@@ -182,7 +182,7 @@ class Plugin(PluginInterface):
 
                 item = Item(
                     title=f"{date} – {title}",
-                    link=detail_page_url,
+                    link=detail_page_url if detail_page_url else self.url,
                     description=description,
                     pub_date=None,  # TODO pub_date parsing
                     author=author,
