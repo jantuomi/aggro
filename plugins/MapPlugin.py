@@ -16,16 +16,17 @@ def set_field(item: Item, k: str, v: Any):
 
 class Plugin(PluginInterface):
     def __init__(self, id: str, params: Params) -> None:
-        super().__init__(id, params)
+        super().__init__("MapPlugin", id, params)
         self.map_expr: str = get_config(params, "map_expr")
-        print(f"[MapItemPlugin#{self.id}] initialized")
+        self.log("initialized")
 
     def process(self, source_id: str | None, items: list[Item]) -> list[Item]:
-        print(f"[MapItemPlugin#{self.id}] process called, n={len(items)}")
         if source_id is None:
-            raise Exception(f"[MapItemPlugin#{self.id}] can not be scheduled")
+            raise Exception(f"{self.log_prefix} can not be scheduled")
+
+        self.log(f"mapping over {len(items)} posts with given map expression")
 
         expr = f"map(lambda item: {self.map_expr}, input_feed)"
         ret = list(eval(expr, {"input_feed": items, "set_field": set_field}))
-        print(f"[MapItemPlugin#{self.id}] process returning items, n={len(ret)}")
+        self.log(f"mapped over {len(ret)} posts")
         return ret

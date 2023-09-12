@@ -10,8 +10,8 @@ from app.utils import ItemDict, dict_to_item, item_to_dict
 
 class Plugin(PluginInterface):
     def __init__(self, id: str, params: Params) -> None:
-        super().__init__(id, params)
-        print(f"[ConcatPlugin#{self.id}] initialized")
+        super().__init__("ConcatPlugin", id, params)
+        self.log("initialized")
 
     def item_sort_key(self, item: Item) -> datetime:
         if item.pub_date is None:
@@ -20,9 +20,9 @@ class Plugin(PluginInterface):
         return item.pub_date
 
     def process(self, source_id: str | None, items: list[Item]) -> list[Item]:
-        print(f"[ConcatPlugin#{self.id}] process called, n={len(items)}")
+        self.log(f"adding {len(items)} to concatenated stream")
         if source_id is None:
-            raise Exception(f"[ConcatPlugin#{self.id}] can not be scheduled")
+            raise Exception(f"{self.log_prefix} can not be scheduled")
 
         plugin_state_q = Query().plugin_id == self.id
         _d: Any = database_manager.plugin_states.get(plugin_state_q)  # type: ignore
@@ -46,5 +46,5 @@ class Plugin(PluginInterface):
         ret_items = list(map(dict_to_item, aggregated_item_dicts))
         ret = sorted(ret_items, key=self.item_sort_key)
 
-        print(f"[ConcatPlugin#{self.id}] process returning items, n={len(ret)}")
+        self.log(f"concatenated {len(ret)} posts into one stream")
         return ret

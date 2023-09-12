@@ -7,10 +7,17 @@ Params: TypeAlias = dict[str, str]
 
 
 class PluginInterface(ABC):
-    def __init__(self, id: str, params: Params):
+    name: str
+
+    def __init__(self, plugin_type: str, id: str, params: Params):
+        self.plugin_type = plugin_type
         self.id = id
         self.params = params
+        self.log_prefix = f"[{self.plugin_type}#{self.id}]"
+
+    def log(self, msg) -> None:
+        print(f"{self.log_prefix} {msg}")
 
     @abstractmethod
     def process(self, source_id: str | None, items: list[Item]) -> list[Item]:
-        pass
+        return NotImplemented

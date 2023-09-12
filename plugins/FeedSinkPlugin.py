@@ -12,13 +12,13 @@ from app.DatabaseManager import database_manager
 
 class Plugin(PluginInterface):
     def __init__(self, id: str, params: dict[str, Any]) -> None:
-        super().__init__(id, params)
+        super().__init__("FeedSinkPlugin", id, params)
         self.feed_id: str = get_config(params, "feed_id")
         self.feed_title: str = get_config(params, "feed_title")
         self.feed_link: str | None = get_config_or_default(params, "feed_link", None)
         self.feed_description: str = get_config(params, "feed_description")
-        print(f"[FeedSinkPlugin#{self.id}] initialized")
-        print(f"[FeedSinkPlugin#{self.id}] feed will be served at path /{self.feed_id}")
+        self.log("initialized")
+        self.log("feed will be served at path /{self.feed_id}")
 
     def build_xml(self, items: list[Item]):
         rss = ET.Element(
@@ -110,16 +110,16 @@ class Plugin(PluginInterface):
         }
 
     def process(self, source_id: str | None, items: list[Item]) -> list[Item]:
-        print(f"[FeedSinkPlugin#{self.id}] process called, n={len(items)}")
+        self.log(f'building feed id "{self.feed_id}" from {len(items)} posts')
 
         if source_id is None:
-            raise Exception(f"FeedSinkPlugin#{self.id} can not be scheduled")
+            raise Exception(f"{self.log_prefix} can not be scheduled")
         if database_manager.db is None:
-            raise Exception("Database is not initialized")
+            raise Exception(f"{self.log_prefix} database is not initialized")
 
         ret = self.build_xml(items)
 
         Q = Query()
         database_manager.feeds.upsert(ret, Q.feed_id == self.feed_id)  # type: ignore
-        print(f"[FeedSinkPlugin#{self.id}] processed")
+        self.log('build complete for feed id "{self.feed_id}"')
         return []

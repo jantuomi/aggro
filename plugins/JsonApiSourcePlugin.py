@@ -9,7 +9,7 @@ from app.utils import ItemDict, get_config, get_config_or_default
 
 class Plugin(PluginInterface):
     def __init__(self, id: str, params: Params) -> None:
-        super().__init__(id, params)
+        super().__init__("JsonApiSourcePlugin", id, params)
         self.url: str = get_config(params, "url").strip("/")
         self.selector_post: str = get_config(params, "selector_post")
         self.selector_title: str | None = get_config_or_default(
@@ -34,7 +34,7 @@ class Plugin(PluginInterface):
             params, "show_image_in_description", True
         )
 
-        print(f"[JsonApiSourcePlugin#{self.id}] initialized")
+        self.log("initialized")
 
     def absolute_link(self, link: str) -> str:
         if link.startswith("/") or link.startswith("#"):
@@ -43,7 +43,12 @@ class Plugin(PluginInterface):
         return link
 
     def process(self, source_id: str | None, items: list[Item]) -> list[Item]:
-        print(f"[JsonApiSourcePlugin#{self.id}] process called")
+        if source_id is not None:
+            raise Exception(
+                f"{self.log_prefix} can only be scheduled, trying to propagate items from source {source_id}"
+            )
+
+        self.log(f'fetching data from JSON API at URL "{self.url}"')
 
         result_items: list[Item] = []
         with requests.session() as session:
@@ -104,7 +109,7 @@ class Plugin(PluginInterface):
                         guid = ItemGUID(f"aggro__{self.id}__{digest[:32]}")
                     else:
                         raise Exception(
-                            f"[JsonApiSourcePlugin#{self.id}] both title and description are None"
+                            f"{self.log_prefix} both title and description are None"
                         )
 
                 if image_src is not None:
@@ -142,7 +147,5 @@ class Plugin(PluginInterface):
                 )
                 result_items.append(item)
 
-        print(
-            f"[JsonApiSourcePlugin#{self.id}] process returns items, n={len(result_items)}"
-        )
+        self.log(f"fetched {len(result_items)} items from JSON API")
         return result_items

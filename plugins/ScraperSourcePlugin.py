@@ -12,7 +12,7 @@ from app.utils import ItemDict, get_config, get_config_or_default
 
 class Plugin(PluginInterface):
     def __init__(self, id: str, params: Params) -> None:
-        super().__init__(id, params)
+        super().__init__("ScraperSourcePlugin", id, params)
         self.url: str = get_config(params, "url").strip("/")
         self.selector_post: str = get_config(params, "selector_post")
         self.selector_title: str | None = get_config_or_default(
@@ -46,7 +46,12 @@ class Plugin(PluginInterface):
         return link
 
     def process(self, source_id: str | None, items: list[Item]) -> list[Item]:
-        print(f"[ScraperSourcePlugin#{self.id}] process called")
+        if source_id is not None:
+            raise Exception(
+                f"{self.log_prefix} can only be scheduled, trying to propagate items from source {source_id}"
+            )
+
+        self.log(f'starting to scrape posts from URL "{self.url}"')
 
         result_items: list[Item] = []
         with requests.session() as session:
@@ -151,7 +156,7 @@ class Plugin(PluginInterface):
                         )
                         if match is None:
                             raise Exception(
-                                f"[ScraperSourcePlugin#{self.id}] weird regex result when looking for background-image"
+                                f"{self.log_prefix} weird regex result when looking for background-image"
                             )
                         image_src = match.group("url")
                     else:
@@ -167,7 +172,7 @@ class Plugin(PluginInterface):
                         guid = ItemGUID(f"aggro__{self.id}__{digest[:32]}")
                     else:
                         raise Exception(
-                            f"[ScraperSourcePlugin#{self.id}] both title and description are None"
+                            f"{self.log_prefix} both title and description are None"
                         )
 
                 if image_src is not None:
@@ -205,7 +210,5 @@ class Plugin(PluginInterface):
                 )
                 result_items.append(item)
 
-        print(
-            f"[ScraperSourcePlugin#{self.id}] process returns items, n={len(result_items)}"
-        )
+        self.log(f'scraped {len(result_items)} posts from URL "{self.url}"')
         return result_items

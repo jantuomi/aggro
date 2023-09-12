@@ -98,7 +98,7 @@ def parse_interval(interval: str) -> tuple[int, str]:
 
 class Plugin(PluginInterface):
     def __init__(self, id: str, params: Params) -> None:
-        super().__init__(id, params)
+        super().__init__("DigestPlugin", id, params)
         self.digest_title_prefix = get_config(params, "digest_title_prefix")
         self.digest_description = get_config_or_default(
             params, "digest_description", None
@@ -109,12 +109,12 @@ class Plugin(PluginInterface):
         interval = get_config(params, "interval")
         self.interval_pair = parse_interval(interval)
         self.max_length = int(get_config_or_default(params, "max_length", "1000"))
-        print(f"[DigestPlugin#{self.id}] initialized")
+        self.log("initialized")
 
     def process(self, source_id: str | None, items: list[Item]) -> list[Item]:
-        print(f"[DigestPlugin#{self.id}] process called, n={len(items)}")
+        self.log(f"building digests from {len(items)} posts")
         if source_id is None:
-            raise Exception(f"[DigestPlugin#{self.id}] can not be scheduled")
+            raise Exception(f"{self.log_prefix} can not be scheduled")
 
         plugin_state_q = Query().plugin_id == self.id
         _d: Any = database_manager.plugin_states.get(plugin_state_q)  # type: ignore
@@ -189,8 +189,6 @@ class Plugin(PluginInterface):
 
             digest_items.append(digest_item)
 
-        print(
-            f"[DigestPlugin#{self.id}] process returning items, n={len(digest_items)}"
-        )
+        self.log(f"digested {len(digest_items)} posts")
 
         return digest_items

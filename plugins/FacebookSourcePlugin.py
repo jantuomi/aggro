@@ -211,25 +211,28 @@ def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> lis
 
 
 class Plugin(PluginInterface):
+    def log(self, msg) -> None:
+        return super().log(msg)
+
     def __init__(self, id: str, params: Params) -> None:
-        super().__init__(id, params)
+        super().__init__("FacebookSourcePlugin", id, params)
         self.login_email = get_config(params, "login_email")
         self.login_password = get_config(params, "login_password")
         self.page_id = get_config(params, "page_id")
         self.limit = int(get_config_or_default(params, "limit", "10"))
-
-        print(f"[FacebookSourcePlugin#{self.id}] initialized")
+        self.log("initialized")
 
     def process(self, source_id: str | None, items: list[Item]) -> list[Item]:
-        print(f"[FacebookSourcePlugin#{self.id}] process called")
         if source_id is not None:
             raise Exception(
-                f"FacebookSourcePlugin#{self.id} can only be scheduled, trying to process items from source {source_id}"
+                f"{self.log_prefix} can only be scheduled, trying to propagate items from source {source_id}"
             )
+
+        self.log(f'scraping posts from FB page id "{self.page_id}"')
 
         posts = fetch_page_posts(
             self.login_email, self.login_password, self.page_id, self.limit
         )
 
-        print(f"[FacebookSourcePlugin#{self.id}] process returns items, n={len(posts)}")
+        self.log(f'scraped {len(posts)} posts from FB page id "{self.page_id}"')
         return posts

@@ -16,24 +16,22 @@ def struct_time_to_utc_datetime(struct_time: time.struct_time) -> datetime:
 
 class Plugin(PluginInterface):
     def __init__(self, id: str, params: Params) -> None:
-        super().__init__(id, params)
+        super().__init__("FeedSourcePlugin", id, params)
         self.feed_url: str = get_config(params, "feed_url")
 
-        print(f"[FeedSourcePlugin#{self.id}] initialized")
+        self.log("initialized")
 
     def process(self, source_id: str | None, items: list[Item]) -> list[Item]:
-        print(f"[FeedSourcePlugin#{self.id}] process called")
         if source_id is not None:
             raise Exception(
                 f"FeedSourcePlugin#{self.id} can only be scheduled, trying to process items from source {source_id}"
             )
 
+        self.log(f'fetching feed "{self.feed_url}"')
         feed: Any = feedparser.parse(self.feed_url)  # type: ignore
         result_items: list[Item] = []
         if "bozo" in feed and feed["bozo"] == 1:
-            raise Exception(
-                f"[FeedSourcePlugin#{self.id}] malformed XML in feed {self.feed_url}"
-            )
+            raise Exception(f"{self.log_prefix} malformed XML in feed {self.feed_url}")
 
         if "image" in feed:
             image_url = feed["image"]["href"]
@@ -83,6 +81,6 @@ class Plugin(PluginInterface):
             )
 
         print(
-            f"[FeedSourcePlugin#{self.id}] process returns items, n={len(result_items)}"
+            f'{self.log_prefix} fetched {len(result_items)} from the feed "{self.feed_url}"'
         )
         return result_items
