@@ -39,7 +39,7 @@ class Plugin(PluginInterface):
         print(f"[ScraperSourcePlugin#{self.id}] initialized")
 
     def absolute_link(self, link: str) -> str:
-        if link.startswith("/"):
+        if link.startswith("/") or link.startswith("#"):
             link = self.url + link
 
         return link
@@ -178,7 +178,9 @@ class Plugin(PluginInterface):
 
                 if description:
                     description = description.replace('src="/', f'src="{self.url}/')
+                    description = description.replace('src="#', f'src="{self.url}#')
                     description = description.replace('href="/', f'href="{self.url}/')
+                    description = description.replace('href="#', f'href="{self.url}#')
 
                 item = Item(
                     title=f"{date} – {title}",
