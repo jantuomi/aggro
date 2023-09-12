@@ -52,46 +52,46 @@ class Plugin(PluginInterface):
 
             for post in post_items:
                 if self.selector_link:
-                    link = eval(self.selector_link, {"post": post, "data": data})[
-                        0
-                    ].strip()
+                    link = eval(
+                        self.selector_link, {"post": post, "data": data}
+                    ).strip()
                     guid = ItemGUID(link, is_perma_link=True)
                 else:
                     link = None
                     guid = None
 
                 if self.selector_title:
-                    title = eval(self.selector_title, {"post": post, "data": data})[
-                        0
-                    ].strip()
+                    title = eval(
+                        self.selector_title, {"post": post, "data": data}
+                    ).strip()
                 else:
                     title = None
 
                 if self.selector_description:
                     description = eval(
                         self.selector_description, {"post": post, "data": data}
-                    )[0].strip()
+                    ).strip()
                 else:
                     description = None
 
                 if self.selector_date:
-                    date = eval(self.selector_date, {"post": post, "data": data})[
-                        0
-                    ].strip()
+                    date = eval(
+                        self.selector_date, {"post": post, "data": data}
+                    ).strip()
                 else:
                     date = None
 
                 if self.selector_author:
-                    author = eval(self.selector_author, {"post": post, "data": data})[
-                        0
-                    ].strip()
+                    author = eval(
+                        self.selector_author, {"post": post, "data": data}
+                    ).strip()
                 else:
                     author = None
 
                 if self.selector_image:
-                    image_src = eval(self.selector_image, {"post": post, "data": data})[
-                        0
-                    ].strip()
+                    image_src = eval(
+                        self.selector_image, {"post": post, "data": data}
+                    ).strip()
                 else:
                     image_src = None
 
