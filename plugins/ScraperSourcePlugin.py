@@ -159,7 +159,14 @@ class Plugin(PluginInterface):
                     image_src = None
 
                 if guid is None:
-                    guid = ItemGUID(f"aggro__{self.id}__{title}")
+                    if title:
+                        guid = ItemGUID(f"aggro__{self.id}__{title}")
+                    elif description:
+                        guid = ItemGUID(f"aggro__{self.id}__{description}")
+                    else:
+                        raise Exception(
+                            f"[ScraperSourcePlugin#{self.id}] both title and description are None"
+                        )
 
                 if image_src is not None:
                     image_src = self.absolute_link(image_src)
