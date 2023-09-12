@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import time
+import hashlib
 from datetime import datetime, timezone
 from typing import Any
 import re
@@ -162,7 +163,8 @@ class Plugin(PluginInterface):
                     if title:
                         guid = ItemGUID(f"aggro__{self.id}__{title}")
                     elif description:
-                        guid = ItemGUID(f"aggro__{self.id}__{description}")
+                        digest = str(hashlib.sha256(description.encode("utf-8")))
+                        guid = ItemGUID(f"aggro__{self.id}__{digest[:32]}")
                     else:
                         raise Exception(
                             f"[ScraperSourcePlugin#{self.id}] both title and description are None"

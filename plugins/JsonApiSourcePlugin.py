@@ -1,5 +1,6 @@
 import json
 from typing import Any
+import hashlib
 import requests
 from app.Item import Item, ItemGUID, ItemMediaContent
 from app.PluginInterface import Params, PluginInterface
@@ -99,10 +100,11 @@ class Plugin(PluginInterface):
                     if title:
                         guid = ItemGUID(f"aggro__{self.id}__{title}")
                     elif description:
-                        guid = ItemGUID(f"aggro__{self.id}__{description}")
+                        digest = str(hashlib.sha256(description.encode("utf-8")))
+                        guid = ItemGUID(f"aggro__{self.id}__{digest[:32]}")
                     else:
                         raise Exception(
-                            f"[ScraperSourcePlugin#{self.id}] both title and description are None"
+                            f"[JsonApiSourcePlugin#{self.id}] both title and description are None"
                         )
 
                 if image_src is not None:
