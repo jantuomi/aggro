@@ -161,6 +161,8 @@ class Plugin(PluginInterface):
                     )[0]
                     if image_elem.has_attr("src"):
                         image_src = image_elem["src"]
+                    elif image_elem.has_attr("content"):
+                        image_src = image_elem["content"]
                     elif image_elem.has_attr("href"):
                         image_src = image_elem["href"]
                     elif (
