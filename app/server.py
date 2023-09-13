@@ -1,5 +1,5 @@
-from typing import Any
-import bottle  # type: ignore
+from typing import Any, cast
+import bottle
 from tinydb import Query
 
 from app.DatabaseManager import database_manager
@@ -19,7 +19,10 @@ def feed_to_tr(feed: dict[str, str]) -> str:
 
 def feeds_to_table(feeds: list[dict[str, str]]) -> str:
     if len(feeds) == 0:
-        return "No feeds (yet). Add feeds by defining them in your Aggrofile. If you did that already, you might have to wait a bit for the data to propagate."
+        return (
+            "No feeds (yet). Add feeds by defining them in your Aggrofile. "
+            + "If you did that already, you might have to wait a bit for the data to propagate."
+        )
 
     trs: list[str] = [feed_to_tr(feed) for feed in feeds]
     thead = f"<thead><tr><td>Feed</td><td>Last build date</td></tr></thead>"
@@ -34,7 +37,7 @@ def index():
 
     Q = Query()
     _feeds = database_manager.feeds.all()
-    feeds: list[dict[str, str]] = _feeds  # type: ignore
+    feeds = cast(list[dict[str, str]], _feeds)
 
     bottle.response.set_header("content-type", "text/html")
     page = f"""
@@ -106,7 +109,7 @@ def feed(feed_id: str):
 
     bottle.response.set_header("content-type", "application/xml")
 
-    feed: Any = res[0]  # type: ignore
+    feed: Any = res[0]
     feed_xml: str = feed["feed_xml"]
     return feed_xml
 

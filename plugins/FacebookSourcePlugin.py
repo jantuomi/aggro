@@ -1,5 +1,6 @@
 import random
 import time
+from typing import cast
 import requests
 import re
 import urllib.parse
@@ -162,9 +163,9 @@ def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> lis
             posts = timeline.select("section > article")
 
             for post in posts:
-                time_tag: Tag = post.find("abbr")  # type: ignore
+                time_tag = cast(Tag, post.find("abbr"))
 
-                link_tag: Tag | None = post.find("a", string="Full Story")  # type: ignore
+                link_tag = cast(Tag | None, post.find("a", string="Full Story"))
                 if link_tag is not None:
                     link = f"{base_url}{link_tag['href']}"
                     # drop tracking parameters that change at a whim

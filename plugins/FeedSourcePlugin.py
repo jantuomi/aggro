@@ -1,7 +1,7 @@
-import feedparser  # type: ignore
+import feedparser
 import time
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, cast
 from app.Item import Item, ItemEnclosure, ItemGUID, ItemMediaContent
 from app.PluginInterface import Params, PluginInterface
 from app.utils import ItemDict, get_config
@@ -28,7 +28,7 @@ class Plugin(PluginInterface):
             )
 
         self.log(f'fetching feed "{self.feed_url}"')
-        feed: Any = feedparser.parse(self.feed_url)  # type: ignore
+        feed: Any = feedparser.parse(self.feed_url)
         result_items: list[Item] = []
         if "bozo" in feed and feed["bozo"] == 1:
             raise Exception(f"{self.log_prefix} malformed XML in feed {self.feed_url}")
@@ -46,7 +46,7 @@ class Plugin(PluginInterface):
             d: ItemDict = _d
             item_enclosures: list[ItemEnclosure] = []
             for _e in d["enclosures"]:
-                e: dict[str, str] = _e  # type: ignore
+                e = cast(dict[str, str], _e)
                 item_enclosures.append(
                     ItemEnclosure(
                         length=e["length"],
@@ -63,17 +63,17 @@ class Plugin(PluginInterface):
                 else datetime_1970
             )
 
-            link: str = d["link"]  # type: ignore
+            link = cast(str, d["link"])
 
             result_items.append(
                 Item(
-                    title=d.get("title", None),  # type: ignore
+                    title=cast(str, d.get("title", None)),
                     link=link,
-                    description=d.get("description", None),  # type: ignore
-                    author=d.get("author", None),  # type: ignore
+                    description=cast(str, d.get("description", None)),
+                    author=cast(str, d.get("author", None)),
                     pub_date=published_datetime,
-                    category=d.get("category", None),  # type: ignore
-                    comments=d.get("comments"),  # type: ignore
+                    category=cast(str, d.get("category", None)),
+                    comments=cast(str, d.get("comments")),
                     enclosures=item_enclosures,
                     guid=ItemGUID(link, is_perma_link=True),
                     media_content=media_content,

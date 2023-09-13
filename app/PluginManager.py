@@ -52,7 +52,7 @@ class PluginManager:
 
             if schedule_expr is not None:
                 job: schedule.Job = eval(schedule_expr, {"schedule": schedule})
-                job.do(self.run_plugin_job, id, None)  # type: ignore
+                job.do(self.run_plugin_job, id, None)
                 self.scheduled_plugin_ids.append(id)
 
             PluginClass: Any = self._plugins[plugin_name]

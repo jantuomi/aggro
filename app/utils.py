@@ -10,7 +10,7 @@ ItemDict: TypeAlias = dict[str, ItemDictValue]
 
 def evaluate_env_ref(v: Any) -> str:
     if type(v) == str and v.startswith("${") and v.endswith("}"):
-        return os.environ[v[2:-1]]  # type: ignore
+        return os.environ[v[2:-1]]
     else:
         return v
 

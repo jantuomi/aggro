@@ -51,7 +51,7 @@ if __name__ == "__main__":
     aggrofile_hash_q = Query().key == "aggrofile_hash"
     aggrofile_stored_hash: str | None
     if database_manager.meta_info.contains(aggrofile_hash_q):
-        aggrofile_stored_hash_obj: Any = database_manager.meta_info.get(  # type: ignore
+        aggrofile_stored_hash_obj: Any = database_manager.meta_info.get(
             aggrofile_hash_q
         )
         aggrofile_stored_hash = aggrofile_stored_hash_obj["value"]
@@ -69,7 +69,7 @@ if __name__ == "__main__":
         print("Aggrofile has been changed. Truncating plugin states in DB...")
         database_manager.plugin_states.truncate()
 
-    database_manager.meta_info.upsert(  # type: ignore
+    database_manager.meta_info.upsert(
         {"key": "aggrofile_hash", "value": aggrofile_current_hash_dig},
         aggrofile_hash_q,
     )

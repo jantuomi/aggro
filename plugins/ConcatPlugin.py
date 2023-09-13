@@ -25,7 +25,7 @@ class Plugin(PluginInterface):
             raise Exception(f"{self.log_prefix} can not be scheduled")
 
         plugin_state_q = Query().plugin_id == self.id
-        _d: Any = database_manager.plugin_states.get(plugin_state_q)  # type: ignore
+        _d: Any = database_manager.plugin_states.get(plugin_state_q)
         data: dict[str, Any] = (
             _d if _d is not None else {"plugin_id": self.id, "state": {}}
         )
@@ -34,7 +34,7 @@ class Plugin(PluginInterface):
         items_as_dicts = list(map(item_to_dict, items))
         state[source_id] = items_as_dicts
 
-        database_manager.plugin_states.upsert(  # type: ignore
+        database_manager.plugin_states.upsert(
             {"plugin_id": self.id, "state": state}, plugin_state_q
         )
 
