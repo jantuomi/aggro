@@ -158,7 +158,7 @@ class Plugin(PluginInterface):
                             raise Exception(
                                 f"{self.log_prefix} weird regex result when looking for background-image"
                             )
-                        image_src = match.group("url")
+                        image_src = match.group("url").strip("'\"")
                     else:
                         image_src = None
                 else:
