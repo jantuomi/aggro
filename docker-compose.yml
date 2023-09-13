@@ -2,7 +2,7 @@ version: '3'
 
 services:
   aggro:
-    image: registry.digitalocean.com/jan-systems-registry/aggro:latest
+    image: aggro:latest
     build:
       context: .
     ports:

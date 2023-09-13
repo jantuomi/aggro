@@ -33,7 +33,8 @@ def index():
         raise Exception("Database is not initialized")
 
     Q = Query()
-    feeds = database_manager.feeds.all()
+    _feeds = database_manager.feeds.all()
+    feeds: list[dict[str, str]] = _feeds  # type: ignore
 
     bottle.response.set_header("content-type", "text/html")
     page = f"""
@@ -67,6 +68,10 @@ def index():
     th, td {{
         padding: 8px;
     }}
+
+    footer {{
+        margin-top: 32px;
+    }}
     </style>
     </head>
     <body>
@@ -74,6 +79,11 @@ def index():
         <i>Feed manipulator</i>
         <h2>Feeds served at this address</h2>
         {feeds_to_table(feeds)}
+        <footer>
+        <p>
+        <a href="https://github.com/jantuomi/aggro">Aggro</a> is MIT licensed open source software.
+        </p>
+        </footer>
     </body>
     </html>
     """

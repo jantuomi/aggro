@@ -121,5 +121,5 @@ class Plugin(PluginInterface):
 
         Q = Query()
         database_manager.feeds.upsert(ret, Q.feed_id == self.feed_id)  # type: ignore
-        self.log('build complete for feed id "{self.feed_id}"')
+        self.log(f'build complete for feed id "{self.feed_id}"')
         return []
