@@ -41,6 +41,7 @@ def index():
 
     bottle.response.set_header("content-type", "text/html")
     page = f"""
+    <!doctype html>
     <html lang="en">
     <head>
     <title>Aggro &ndash; Feed manipulator</title>
