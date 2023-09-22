@@ -22,7 +22,11 @@ def get_config(config: dict[str, Any], key: str) -> Any:
     except KeyError:
         raise Exception(f"no {key} field in config: " + str(config))
 
-    return evaluate_env_ref(v)
+    if type(v) == list:
+        mapped = map(evaluate_env_ref, v)
+        return list(mapped)
+    else:
+        return evaluate_env_ref(v)
 
 
 def get_config_or_default(
@@ -30,7 +34,11 @@ def get_config_or_default(
 ) -> Any:
     v: Any = config.get(key, default)
 
-    return evaluate_env_ref(v)
+    if type(v) == list:
+        mapped = map(evaluate_env_ref, v)
+        return list(mapped)
+    else:
+        return evaluate_env_ref(v)
 
 
 def item_to_dict(item: Item) -> ItemDict:

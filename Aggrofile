@@ -1,7 +1,17 @@
 {
     "db_path": "db.json",
-    "server_host": "0.0.0.0",
-    "server_port": 8080,
+    "server": {
+        "host": "0.0.0.0",
+        "port": 8080
+    },
+    "email_alerter": {
+        "api_url": "${AGGRO_EMAIL_ALERT_API_URL}",
+        "api_auth": "${AGGRO_EMAIL_ALERT_API_AUTH}",
+        "email_from": "${AGGRO_EMAIL_ALERT_FROM}",
+        "email_to": [
+            "${AGGRO_EMAIL_ALERT_TO}"
+        ]
+    },
     "plugins": {
         "aaniwalli_scraper": {
             "plugin": "ScraperSourcePlugin",

@@ -7,7 +7,7 @@ import time
 from typing import Any
 
 from tinydb import Query
-from app.AggroConfig import AggroConfig
+from app.AggroConfig import AggroConfig, AggroConfigServer, AggroConfigEmailAlerter
 from app.MemoryState import memory_state
 from app.PluginManager import PluginManager
 from app.DatabaseManager import database_manager
@@ -25,7 +25,7 @@ def run_plugin_thread(manager: PluginManager, config: AggroConfig):
 
 def run_server_thread(config: AggroConfig):
     print("Server thread starting...")
-    run_web_server(config.server_host, config.server_port)
+    run_web_server(config.server.host, config.server.port)
     print("Server thread exiting...")
 
 
@@ -38,9 +38,26 @@ if __name__ == "__main__":
         aggrofile_content = f.read()
         aggrofile = json.loads(aggrofile_content)
 
+    aggrofile_server = get_config_or_default(aggrofile, "server", {})
+    server_config = AggroConfigServer(
+        host=get_config_or_default(aggrofile_server, "server_host", "localhost"),
+        port=get_config_or_default(aggrofile_server, "server_port", 8080),
+    )
+
+    aggrofile_email_alerter = get_config_or_default(aggrofile, "email_alerter", None)
+    if aggrofile_email_alerter:
+        email_alerter_config = AggroConfigEmailAlerter(
+            api_url=get_config(aggrofile_email_alerter, "api_url"),
+            api_auth=get_config(aggrofile_email_alerter, "api_auth"),
+            email_from=get_config(aggrofile_email_alerter, "email_from"),
+            email_to=get_config(aggrofile_email_alerter, "email_to"),
+        )
+    else:
+        email_alerter_config = None
+
     aggro_config = AggroConfig(
-        server_host=get_config_or_default(aggrofile, "server_host", "localhost"),
-        server_port=get_config_or_default(aggrofile, "server_port", 8080),
+        server=server_config,
+        email_alerter=email_alerter_config,
         db_path=get_config_or_default(aggrofile, "db_path", "db.json"),
         plugins=get_config(aggrofile, "plugins"),
         graph=get_config(aggrofile, "graph"),

@@ -1,13 +1,16 @@
 import importlib
 import schedule
 import time
+import sys
+import traceback
 from types import ModuleType
 from typing import Any
 from app.Item import Item
 from app.PluginInterface import Params, PluginInterface
-from app.AggroConfig import AggroConfig
+from app.AggroConfig import AggroConfig, AggroConfigEmailAlerter
 from app.utils import get_config
 from app.MemoryState import memory_state
+from app.EmailAlerter import EmailAlerter
 
 
 class PluginManager:
@@ -16,6 +19,8 @@ class PluginManager:
         self.plugin_instances: dict[str, PluginInterface] = {}
         self.config = config
         self.scheduled_plugin_ids: list[str] = []
+        if self.config.email_alerter:
+            self.email_alerter = EmailAlerter.from_config(self.config.email_alerter)
 
     def load_plugin(self, plugin_name: str) -> None:
         module: ModuleType = importlib.import_module(f"plugins.{plugin_name}")
@@ -36,9 +41,15 @@ class PluginManager:
         if not memory_state.running:
             return
 
-        plugin: PluginInterface = self.plugin_instances[id]
-        ret_items: list[Item] = plugin.process(source_id, items)
-        self.propagate(id, ret_items)
+        try:
+            plugin: PluginInterface = self.plugin_instances[id]
+            ret_items: list[Item] = plugin.process(source_id, items)
+            self.propagate(id, ret_items)
+        except Exception as ex:
+            exc = traceback.format_exc()
+            print(exc, file=sys.stderr)
+            if self.email_alerter:
+                self.email_alerter.send_alert(exc)
 
     def build_plugin_instances(self):
         for id in self.config.plugins:

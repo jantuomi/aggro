@@ -4,9 +4,23 @@ from app.PluginInterface import Params
 
 
 @dataclass
+class AggroConfigServer:
+    host: str
+    port: int
+
+
+@dataclass
+class AggroConfigEmailAlerter:
+    api_url: str
+    api_auth: str
+    email_from: str
+    email_to: list[str]
+
+
+@dataclass
 class AggroConfig:
-    server_host: str
-    server_port: int
+    server: AggroConfigServer
+    email_alerter: AggroConfigEmailAlerter | None
     db_path: str
     plugins: dict[str, Params]
     graph: dict[str, list[str]]
