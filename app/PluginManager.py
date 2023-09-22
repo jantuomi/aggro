@@ -42,10 +42,15 @@ class PluginManager:
             return
 
         try:
-            plugin: PluginInterface = self.plugin_instances[id]
-            ret_items: list[Item] = plugin.process(source_id, items)
-            self.propagate(id, ret_items)
-        except Exception as ex:
+            try:
+                plugin: PluginInterface = self.plugin_instances[id]
+                ret_items: list[Item] = plugin.process(source_id, items)
+                self.propagate(id, ret_items)
+            except Exception as ex:
+                ex.add_note(f"context: plugin id: {id}, source id: {source_id}")
+                raise
+
+        except:
             exc = traceback.format_exc()
             print(exc, file=sys.stderr)
             if self.email_alerter:

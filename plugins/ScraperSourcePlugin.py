@@ -2,12 +2,12 @@ from bs4 import BeautifulSoup
 import time
 import hashlib
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, TypeVar, cast, overload
 import re
 import requests
 from app.Item import Item, ItemEnclosure, ItemGUID, ItemMediaContent
 from app.PluginInterface import Params, PluginInterface
-from app.utils import ItemDict, get_config, get_config_or_default
+from app.utils import ItemDict, dump_to_file, get_config, get_config_or_default
 
 
 class Plugin(PluginInterface):
@@ -39,11 +39,56 @@ class Plugin(PluginInterface):
 
         print(f"[ScraperSourcePlugin#{self.id}] initialized")
 
-    def absolute_link(self, link: str) -> str:
+    def absolute_link(self, link: str | list[str]) -> str:
+        if type(link) == list:
+            link = link[0]
+
+        link = cast(str, link)
         if link.startswith("/") or link.startswith("#"):
             link = self.url + link
 
         return link
+
+    def get_url(self, session: requests.Session, url: str):
+        try:
+            resp = session.get(url, allow_redirects=True)
+            if resp.status_code >= 400:
+                raise Exception("status_code >= 400")
+        except Exception as ex:
+            ex.add_note(f"{self.log_prefix} failed to fetch page, url: {url}")
+            raise
+
+        return resp
+
+    def parse_html(self, from_url: str, html: str):
+        try:
+            elem = BeautifulSoup(html, "html.parser")
+        except Exception as ex:
+            dump_file_name = dump_to_file(self.id, html)
+            ex.add_note(
+                f"{self.log_prefix} failed to parse HTML from {from_url}, HTML dumped to {dump_file_name}"
+            )
+            raise
+
+        return elem
+
+    def eval_selector(
+        self, selector: str | None, ctx: dict[str, Any]
+    ) -> list[BeautifulSoup]:
+        if not selector:
+            return []
+
+        try:
+            elems = eval(selector, ctx)
+        except Exception as ex:
+            dump_file_name = dump_to_file(self.id, str(ctx))
+            ex.add_note(
+                f"{self.log_prefix} failed to eval selector:\n  {selector}\n"
+                + f"HTML dumped to {dump_file_name}"
+            )
+            raise
+
+        return elems
 
     def process(self, source_id: str | None, items: list[Item]) -> list[Item]:
         if source_id is not None:
@@ -73,98 +118,99 @@ class Plugin(PluginInterface):
         with requests.session() as session:
             session.headers.update(headers)
 
-            page_resp = session.get(self.url, allow_redirects=True)
-            page_elem = BeautifulSoup(page_resp.text, "html.parser")
-            post_elems = eval(self.selector_post, {"page": page_elem})
+            # Fetch the page
+            page_resp = self.get_url(session, url=self.url)
 
+            # Parse the page
+            page_elem = self.parse_html(from_url=self.url, html=page_resp.text)
+
+            # Evaluate post selector on parsed page
+            ctx: dict[str, BeautifulSoup | None] = {"page": page_elem}
+            post_elems = self.eval_selector(self.selector_post, ctx=ctx)
+
+            if post_elems is None:
+                post_elems = []
+
+            # For each post on page
             for post_elem in post_elems:
-                if self.selector_link:
-                    link_elem = eval(
-                        self.selector_link, {"page": page_elem, "post": post_elem}
-                    )[0]
-                    detail_page_url = self.absolute_link(link_elem["href"])
-                else:
-                    detail_page_url = None
+                ctx_with_post: dict[str, BeautifulSoup | None] = {
+                    "page": page_elem,
+                    "post": post_elem,
+                }
 
+                # Evaluate link selector on post
+                link_elems = self.eval_selector(self.selector_link, ctx=ctx_with_post)
+                detail_page_url = (
+                    self.absolute_link(link_elems[0]["href"])
+                    if len(link_elems) > 0
+                    else None
+                )
+
+                # Fetch and parse post detail page
                 if detail_page_url:
-                    detail_page_resp = session.get(
-                        detail_page_url, allow_redirects=True
+                    # Fetch
+                    detail_page_resp = self.get_url(session, url=detail_page_url)
+                    detail_page_elem = self.parse_html(
+                        from_url=detail_page_url, html=detail_page_resp.text
                     )
-                    detail_page_elem = BeautifulSoup(
-                        detail_page_resp.text, "html.parser"
-                    )
+
                     guid = ItemGUID(detail_page_url, is_perma_link=True)
                 else:
                     detail_page_elem = None
                     guid = None
 
-                if self.selector_title:
-                    title_elem = eval(
-                        self.selector_title,
-                        {
-                            "page": page_elem,
-                            "post": post_elem,
-                            "detail_page": detail_page_elem,
-                        },
-                    )[0]
-                    title = title_elem.get_text().strip()
-                else:
-                    title = None
+                ctx_with_post_detail: dict[str, BeautifulSoup | None] = {
+                    "page": page_elem,
+                    "post": post_elem,
+                    "detail_page": detail_page_elem,
+                }
 
-                if self.selector_description:
-                    description_elem = eval(
-                        self.selector_description,
-                        {
-                            "page": page_elem,
-                            "post": post_elem,
-                            "detail_page": detail_page_elem,
-                        },
-                    )[0]
-                    description = str(description_elem).strip()
-                else:
-                    description = None
+                # Evaluate title selector on post
+                title_elems = self.eval_selector(
+                    self.selector_title, ctx=ctx_with_post_detail
+                )
+                title = (
+                    title_elems[0].get_text().strip() if len(title_elems) > 0 else None
+                )
 
-                if self.selector_date:
-                    date_elem = eval(
-                        self.selector_date,
-                        {
-                            "page": page_elem,
-                            "post": post_elem,
-                            "detail_page": detail_page_elem,
-                        },
-                    )[0]
-                    date = date_elem.get_text().strip()
-                else:
-                    date = None
+                # Evaluate description selector on post
+                description_elems = self.eval_selector(
+                    self.selector_description, ctx=ctx_with_post_detail
+                )
+                description = (
+                    str(description_elems[0]).strip()
+                    if len(description_elems) > 0
+                    else None
+                )
 
-                if self.selector_author:
-                    author_elem = eval(
-                        self.selector_author,
-                        {
-                            "page": page_elem,
-                            "post": post_elem,
-                            "detail_page": detail_page_elem,
-                        },
-                    )[0]
-                    author = author_elem.get_text().strip()
-                else:
-                    author = None
+                # Evaluate date selector on post
+                date_elems = self.eval_selector(
+                    self.selector_date, ctx=ctx_with_post_detail
+                )
+                date = date_elems[0].get_text().strip() if len(date_elems) > 0 else None
 
-                if self.selector_image:
-                    image_elem = eval(
-                        self.selector_image,
-                        {
-                            "page": page_elem,
-                            "post": post_elem,
-                            "detail_page": detail_page_elem,
-                        },
-                    )[0]
+                # Evaluate author selector on post
+                author_elems = self.eval_selector(
+                    self.selector_author, ctx=ctx_with_post_detail
+                )
+                author = (
+                    author_elems[0].get_text().strip()
+                    if len(author_elems) > 0
+                    else None
+                )
+
+                image_elems = self.eval_selector(
+                    self.selector_image, ctx=ctx_with_post_detail
+                )
+                image_elem = image_elems[0] if len(image_elems) > 0 else None
+                image_src: str | None = None
+                if image_elem:
                     if image_elem.has_attr("src"):
-                        image_src = image_elem["src"]
+                        image_src = cast(str, image_elem["src"])
                     elif image_elem.has_attr("content"):
-                        image_src = image_elem["content"]
+                        image_src = cast(str, image_elem["content"])
                     elif image_elem.has_attr("href"):
-                        image_src = image_elem["href"]
+                        image_src = cast(str, image_elem["href"])
                     elif (
                         image_elem.has_attr("style")
                         and "background-image:" in image_elem["style"]
@@ -177,11 +223,7 @@ class Plugin(PluginInterface):
                             raise Exception(
                                 f"{self.log_prefix} weird regex result when looking for background-image"
                             )
-                        image_src = match.group("url").strip("'\"")
-                    else:
-                        image_src = None
-                else:
-                    image_src = None
+                        image_src = cast(str, match.group("url").strip("'\""))
 
                 if guid is None:
                     if title:
@@ -194,7 +236,7 @@ class Plugin(PluginInterface):
                             f"{self.log_prefix} both title and description are None"
                         )
 
-                if image_src is not None:
+                if image_src:
                     image_src = self.absolute_link(image_src)
                     image_html = f'<img src="{image_src}"><br><br>'
                     if description and self.show_image_in_description:

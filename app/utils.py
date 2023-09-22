@@ -50,3 +50,11 @@ def item_to_dict(item: Item) -> ItemDict:
 def dict_to_item(d: ItemDict) -> Item:
     pub_date, rest = (lambda pub_date, **rest: (pub_date, rest))(**d)  # type: ignore
     return Item(pub_date=datetime.fromisoformat(pub_date), **rest)  # type: ignore
+
+
+def dump_to_file(prefix: str, text: str):
+    now = datetime.now().isoformat()
+    dump_file_name = f"dump/{prefix}__{now}"
+    with open(dump_file_name, "w") as f:
+        f.write(text)
+    return dump_file_name
