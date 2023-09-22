@@ -40,8 +40,8 @@ if __name__ == "__main__":
 
     aggrofile_server = get_config_or_default(aggrofile, "server", {})
     server_config = AggroConfigServer(
-        host=get_config_or_default(aggrofile_server, "server_host", "localhost"),
-        port=get_config_or_default(aggrofile_server, "server_port", 8080),
+        host=get_config_or_default(aggrofile_server, "host", "localhost"),
+        port=get_config_or_default(aggrofile_server, "port", 8080),
     )
 
     aggrofile_email_alerter = get_config_or_default(aggrofile, "email_alerter", None)
