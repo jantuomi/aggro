@@ -82,7 +82,11 @@ def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> lis
             f"{base_url}/login/", headers=headers, allow_redirects=True
         )
         if cookie_page_resp.status_code >= 400:
-            raise Exception(cookie_page_resp.text)
+            ex = Exception(
+                f"status_code >= 400, got {cookie_page_resp.status_code} when fetching cookies consent page"
+            )
+            ex.add_note(cookie_page_resp.text[0:1000])
+            raise ex
 
         cookie_page = BeautifulSoup(cookie_page_resp.text, "html.parser")
         lsd: str = cookie_page.find("input", {"name": "lsd"})["value"]  # type: ignore
@@ -105,7 +109,11 @@ def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> lis
         )
 
         if login_page_resp.status_code >= 400:
-            raise Exception(login_page_resp.text)
+            ex = Exception(
+                f"status_code >= 400, got {login_page_resp.status_code} when fetching login page"
+            )
+            ex.add_note(login_page_resp.text[0:1000])
+            raise ex
 
         login_page = BeautifulSoup(login_page_resp.text, "html.parser")
 
@@ -144,7 +152,11 @@ def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> lis
         )
 
         if login_post_resp.status_code >= 400:
-            raise Exception(login_post_resp.text)
+            ex = Exception(
+                f"status_code >= 400, got {login_post_resp.status_code} when sending login POST"
+            )
+            ex.add_note(login_post_resp.text[0:1000])
+            raise ex
 
         page_timeline_url = f"{base_url}/{page_id}?v=timeline"
         items: list[Item] = []
@@ -157,7 +169,11 @@ def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> lis
             )
 
             if timeline_resp.status_code >= 400:
-                raise Exception(timeline_resp.text)
+                ex = Exception(
+                    f"status_code >= 400, got {timeline_resp.status_code} when fetching timeline page"
+                )
+                ex.add_note(timeline_resp.text[0:1000])
+                raise ex
 
             timeline = BeautifulSoup(timeline_resp.text, "html.parser")
             posts = timeline.select("section > article")

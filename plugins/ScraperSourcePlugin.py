@@ -53,7 +53,9 @@ class Plugin(PluginInterface):
         try:
             resp = session.get(url, allow_redirects=True)
             if resp.status_code >= 400:
-                raise Exception("status_code >= 400")
+                ex = Exception(f"status_code >= 400, got {resp.status_code}")
+                ex.add_note(resp.text[0:1000])
+                raise ex
         except Exception as ex:
             ex.add_note(f"{self.log_prefix} failed to fetch page, url: {url}")
             raise
