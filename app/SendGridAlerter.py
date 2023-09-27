@@ -25,27 +25,27 @@ class SendGridAlerter:
         try:
             now = datetime.now()
             now_text = now.strftime("%a, %d %b %Y %H:%M:%S +0000")
-            to_lst = [{"email": email} for email in self.email_to]
+
+            from_name, from_email = self.email_from.split(":")
+            to_lst = [{"email": to} for to in self.email_to]
             subject = f"Aggro alert on {now_text}"
             API_URL = "https://api.sendgrid.com/v3/mail/send"
+
             data = {
                 "personalizations": [{"to": to_lst}],
-                "from": {"email": self.email_from},
-                "subject": subject,
+                "from": {"email": from_email, "name": from_name},
+                "subject": f"Aggro alert on {now_text}",
                 "content": [
                     {
-                        "type": "text/plain",
-                        "value": text,
+                        "type": "text/html",
+                        "value": f"<pre>{text}</pre>",
                     }
                 ],
             }
             r = requests.post(
                 API_URL,
-                data=data,
-                headers={
-                    "Authorization": f"Bearer {self.api_token}",
-                    "Content-Type": "application/json",
-                },
+                json=data,
+                headers={"Authorization": f"Bearer {self.api_token}"},
             )
             if r.status_code >= 400:
                 raise Exception(
