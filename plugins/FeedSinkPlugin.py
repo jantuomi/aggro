@@ -18,7 +18,7 @@ class Plugin(PluginInterface):
         self.feed_link: str | None = get_config_or_default(params, "feed_link", None)
         self.feed_description: str = get_config(params, "feed_description")
         self.log("initialized")
-        self.log("feed will be served at path /{self.feed_id}")
+        self.log(f"feed will be served at path /{self.feed_id}")
 
     def build_xml(self, items: list[Item]):
         rss = ET.Element(
