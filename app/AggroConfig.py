@@ -12,7 +12,7 @@ class AggroConfigServer:
 @dataclass
 class AggroConfigEmailAlerter:
     api_url: str
-    api_auth: str
+    api_headers: dict[str, str]
     email_from: str
     email_to: list[str]
 

@@ -6,7 +6,10 @@
     },
     "email_alerter": {
         "api_url": "${AGGRO_EMAIL_ALERT_API_URL}",
-        "api_auth": "${AGGRO_EMAIL_ALERT_API_AUTH}",
+        "api_headers": {
+            "Authorization": "${AGGRO_EMAIL_ALERT_API_AUTH}",
+            "Content-Type": "application/json"
+        },
         "email_from": "${AGGRO_EMAIL_ALERT_FROM}",
         "email_to": [
             "${AGGRO_EMAIL_ALERT_TO}"

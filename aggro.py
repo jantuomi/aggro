@@ -48,7 +48,7 @@ if __name__ == "__main__":
     if aggrofile_email_alerter:
         email_alerter_config = AggroConfigEmailAlerter(
             api_url=get_config(aggrofile_email_alerter, "api_url"),
-            api_auth=get_config(aggrofile_email_alerter, "api_auth"),
+            api_headers=get_config(aggrofile_email_alerter, "api_headers"),
             email_from=get_config(aggrofile_email_alerter, "email_from"),
             email_to=get_config(aggrofile_email_alerter, "email_to"),
         )

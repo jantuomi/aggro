@@ -11,17 +11,16 @@ class EmailAlerter:
         return EmailAlerter(**asdict(config))
 
     def __init__(
-        self, api_url: str, api_auth: str, email_from: str, email_to: list[str]
+        self,
+        api_url: str,
+        api_headers: dict[str, str],
+        email_from: str,
+        email_to: list[str],
     ):
         self.api_url = api_url
         self.email_from = email_from
         self.email_to = email_to
-        api_auth_parts = api_auth.split(":")
-        if len(api_auth_parts) != 2:
-            raise Exception(
-                "[EmailAlerter] supplied api_auth is not of form <key>:<value>"
-            )
-        self.api_auth = (api_auth_parts[0], api_auth_parts[1])
+        self.api_headers = api_headers
 
     def send_alert(self, text: str):
         try:
@@ -35,8 +34,8 @@ class EmailAlerter:
             }
             r = requests.post(
                 self.api_url,
-                auth=self.api_auth,
                 data=data,
+                headers=self.api_headers,
             )
             if r.status_code >= 400:
                 raise Exception(
