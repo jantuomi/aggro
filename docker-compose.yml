@@ -2,7 +2,7 @@ version: '3'
 
 services:
   aggro:
-    image: aggro:latest
+    image: registry.jan.systems/aggro:latest
     build:
       context: .
     ports:

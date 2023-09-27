@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGE=registry.digitalocean.com/jan-systems-registry/aggro:latest
+IMAGE=registry.jan.systems/aggro:latest
 
 set -euxo pipefail
 docker build --platform linux/amd64 -t $IMAGE .
