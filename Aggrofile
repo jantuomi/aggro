@@ -4,15 +4,12 @@
         "host": "0.0.0.0",
         "port": 8080
     },
-    "email_alerter": {
-        "api_url": "${AGGRO_EMAIL_ALERT_API_URL}",
-        "api_headers": {
-            "Authorization": "${AGGRO_EMAIL_ALERT_API_AUTH}",
-            "Content-Type": "application/json"
-        },
-        "email_from": "${AGGRO_EMAIL_ALERT_FROM}",
+    "sendgrid_alerter": {
+        "api_url": "${AGGRO_SENDGRID_API_URL}",
+        "api_token": "${AGGRO_SENDGRID_API_TOKEN}",
+        "email_from": "${AGGRO_SENDGRID_FROM}",
         "email_to": [
-            "${AGGRO_EMAIL_ALERT_TO}"
+            "${AGGRO_SENDGRID_TO}"
         ]
     },
     "plugins": {

@@ -7,7 +7,7 @@ import time
 from typing import Any
 
 from tinydb import Query
-from app.AggroConfig import AggroConfig, AggroConfigServer, AggroConfigEmailAlerter
+from app.AggroConfig import AggroConfig, AggroConfigServer, AggroConfigSendGridAlerter
 from app.MemoryState import memory_state
 from app.PluginManager import PluginManager
 from app.DatabaseManager import database_manager
@@ -44,11 +44,10 @@ if __name__ == "__main__":
         port=get_config_or_default(aggrofile_server, "port", 8080),
     )
 
-    aggrofile_email_alerter = get_config_or_default(aggrofile, "email_alerter", None)
+    aggrofile_email_alerter = get_config_or_default(aggrofile, "sendgrid_alerter", None)
     if aggrofile_email_alerter:
-        email_alerter_config = AggroConfigEmailAlerter(
-            api_url=get_config(aggrofile_email_alerter, "api_url"),
-            api_headers=get_config(aggrofile_email_alerter, "api_headers"),
+        email_alerter_config = AggroConfigSendGridAlerter(
+            api_token=get_config(aggrofile_email_alerter, "api_token"),
             email_from=get_config(aggrofile_email_alerter, "email_from"),
             email_to=get_config(aggrofile_email_alerter, "email_to"),
         )
@@ -57,7 +56,7 @@ if __name__ == "__main__":
 
     aggro_config = AggroConfig(
         server=server_config,
-        email_alerter=email_alerter_config,
+        sendgrid_alerter=email_alerter_config,
         db_path=get_config_or_default(aggrofile, "db_path", "db.json"),
         plugins=get_config(aggrofile, "plugins"),
         graph=get_config(aggrofile, "graph"),

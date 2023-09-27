@@ -10,9 +10,8 @@ class AggroConfigServer:
 
 
 @dataclass
-class AggroConfigEmailAlerter:
-    api_url: str
-    api_headers: dict[str, str]
+class AggroConfigSendGridAlerter:
+    api_token: str
     email_from: str
     email_to: list[str]
 
@@ -20,7 +19,7 @@ class AggroConfigEmailAlerter:
 @dataclass
 class AggroConfig:
     server: AggroConfigServer
-    email_alerter: AggroConfigEmailAlerter | None
+    sendgrid_alerter: AggroConfigSendGridAlerter | None
     db_path: str
     plugins: dict[str, Params]
     graph: dict[str, list[str]]

@@ -7,10 +7,10 @@ from types import ModuleType
 from typing import Any
 from app.Item import Item
 from app.PluginInterface import Params, PluginInterface
-from app.AggroConfig import AggroConfig, AggroConfigEmailAlerter
+from app.AggroConfig import AggroConfig, AggroConfigSendGridAlerter
 from app.utils import get_config
 from app.MemoryState import memory_state
-from app.EmailAlerter import EmailAlerter
+from app.SendGridAlerter import SendGridAlerter
 
 
 class PluginManager:
@@ -19,8 +19,10 @@ class PluginManager:
         self.plugin_instances: dict[str, PluginInterface] = {}
         self.config = config
         self.scheduled_plugin_ids: list[str] = []
-        if self.config.email_alerter:
-            self.email_alerter = EmailAlerter.from_config(self.config.email_alerter)
+        if self.config.sendgrid_alerter:
+            self.sendgrid_alerter = SendGridAlerter.from_config(
+                self.config.sendgrid_alerter
+            )
 
     def load_plugin(self, plugin_name: str) -> None:
         module: ModuleType = importlib.import_module(f"plugins.{plugin_name}")
@@ -53,8 +55,8 @@ class PluginManager:
         except:
             exc = traceback.format_exc()
             print(exc, file=sys.stderr)
-            if self.email_alerter:
-                self.email_alerter.send_alert(exc)
+            if self.sendgrid_alerter:
+                self.sendgrid_alerter.send_alert(exc)
 
     def build_plugin_instances(self):
         for id in self.config.plugins:
