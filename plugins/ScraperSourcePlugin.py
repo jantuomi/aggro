@@ -219,7 +219,7 @@ class Plugin(PluginInterface):
                     ):
                         match = re.match(
                             r"background-image:\s*url\((?P<url>.*?)\)",
-                            image_elem["style"],
+                            cast(str, image_elem["style"]),
                         )
                         if match is None:
                             raise Exception(
