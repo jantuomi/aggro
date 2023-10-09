@@ -39,7 +39,7 @@ def parse_custom_date(date_str: str) -> datetime:
     except ValueError:
         pass
 
-    # Parse relative times like "14 hrs" and "20 mins"
+    # Try parsing relative times like "14 hrs" and "20 mins"
     now = datetime.now()
     match = re.match(r"(\d+)\s*(hr|hrs|min|mins)\s*", date_str, re.IGNORECASE)
     if match:
@@ -53,6 +53,22 @@ def parse_custom_date(date_str: str) -> datetime:
             raise ValueError("Unparseable date: " + date_str)
 
         return now - delta
+
+    # Try parsing relative times like "Yesterday at 12:19 PM"
+    match = re.match(r"Yesterday at (\d+):(\d+)\s(\w+)", date_str, re.IGNORECASE)
+    if match:
+        hour, minute, am_pm = match.groups()
+        hour = int(hour)
+        minute = int(minute)
+        am_pm = am_pm.lower()
+        # Convert to 24-hour format
+        if am_pm == "pm" and hour != 12:
+            hour += 12
+        if am_pm == "am" and hour == 12:
+            hour = 0
+
+        yesterday = datetime.now() - timedelta(days=1)
+        return datetime(yesterday.year, yesterday.month, yesterday.day, hour, minute, 0)
 
     raise ValueError("Unparseable date: " + date_str)
 
