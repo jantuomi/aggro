@@ -2,6 +2,7 @@ import json
 from typing import Any
 import hashlib
 import requests
+from traceback import print_exc
 from app.Item import Item, ItemGUID, ItemMediaContent
 from app.PluginInterface import Params, PluginInterface
 from app.utils import ItemDict, get_config, get_config_or_default
@@ -95,9 +96,16 @@ class Plugin(PluginInterface):
                     author = None
 
                 if self.selector_image:
-                    image_src = eval(
-                        self.selector_image, {"post": post, "data": data}
-                    ).strip()
+                    try:
+                        image_src = eval(
+                            self.selector_image, {"post": post, "data": data}
+                        ).strip()
+                    except Exception:
+                        print_exc()
+                        self.log(
+                            f"failed to extract image source with selector: {self.selector_image}, skipping image"
+                        )
+                        image_src = None
                 else:
                     image_src = None
 
