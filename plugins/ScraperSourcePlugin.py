@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import time
+from traceback import print_exc
 import hashlib
 from datetime import datetime, timezone
 from typing import Any, TypeVar, cast, overload
@@ -201,11 +202,19 @@ class Plugin(PluginInterface):
                     else None
                 )
 
-                image_elems = self.eval_selector(
-                    self.selector_image, ctx=ctx_with_post_detail
-                )
-                image_elem = image_elems[0] if len(image_elems) > 0 else None
-                image_src: str | None = None
+                try:
+                    image_elems = self.eval_selector(
+                        self.selector_image, ctx=ctx_with_post_detail
+                    )
+                    image_elem = image_elems[0] if len(image_elems) > 0 else None
+                    image_src: str | None = None
+                except Exception:
+                    print_exc()
+                    self.log(
+                        f"failed to extract image source with selector: {self.selector_image}, skipping image"
+                    )
+                    image_src = None
+
                 if image_elem:
                     if image_elem.has_attr("src"):
                         image_src = cast(str, image_elem["src"])
