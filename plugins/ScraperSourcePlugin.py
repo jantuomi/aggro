@@ -87,7 +87,7 @@ class Plugin(PluginInterface):
             dump_file_name = dump_to_file(self.id, str(ctx))
             ex.add_note(
                 f"{self.log_prefix} failed to eval selector:\n  {selector}\n"
-                + f"HTML dumped to {dump_file_name}"
+                + f"HTML dumped to {dump_file_name}.\n"
             )
             raise
 
@@ -152,6 +152,7 @@ class Plugin(PluginInterface):
                 # Fetch and parse post detail page
                 if detail_page_url:
                     # Fetch
+                    self.log(f"scraping detail page: {detail_page_url}")
                     detail_page_resp = self.get_url(session, url=detail_page_url)
                     detail_page_elem = self.parse_html(
                         from_url=detail_page_url, html=detail_page_resp.text
