@@ -214,6 +214,7 @@ class Plugin(PluginInterface):
                     self.log(
                         f"failed to extract image source with selector: {self.selector_image}, skipping image"
                     )
+                    image_elem = None
                     image_src = None
 
                 if image_elem:
