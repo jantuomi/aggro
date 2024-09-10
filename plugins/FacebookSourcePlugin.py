@@ -73,7 +73,9 @@ def parse_custom_date(date_str: str) -> datetime:
     raise ValueError("Unparseable date: " + date_str)
 
 
-def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> list[Item]:
+def fetch_page_posts(
+    email: str, password: str, page_id: str, limit: int, is_group: bool
+) -> list[Item]:
     base_url = "https://mbasic.facebook.com"
     with requests.session() as session:
         headers = {
@@ -174,7 +176,10 @@ def fetch_page_posts(email: str, password: str, page_id: str, limit: int) -> lis
             ex.add_note(login_post_resp.text[0:1000])
             raise ex
 
-        page_timeline_url = f"{base_url}/{page_id}?v=timeline"
+        if is_group:
+            page_timeline_url = f"{base_url}/groups/{page_id}"
+        else:
+            page_timeline_url = f"{base_url}/{page_id}?v=timeline"
         items: list[Item] = []
         done = False
         while len(items) < limit and not done:
@@ -252,6 +257,7 @@ class Plugin(PluginInterface):
         self.login_email = get_config(params, "login_email")
         self.login_password = get_config(params, "login_password")
         self.page_id = get_config(params, "page_id")
+        self.is_group = get_config_or_default(params, "is_group", False)
         self.limit = int(get_config_or_default(params, "limit", "10"))
         self.log("initialized")
 
@@ -264,7 +270,11 @@ class Plugin(PluginInterface):
         self.log(f'scraping posts from FB page id "{self.page_id}"')
 
         posts = fetch_page_posts(
-            self.login_email, self.login_password, self.page_id, self.limit
+            self.login_email,
+            self.login_password,
+            self.page_id,
+            self.limit,
+            self.is_group,
         )
 
         self.log(f'scraped {len(posts)} posts from FB page id "{self.page_id}"')
