@@ -37,6 +37,9 @@ class Plugin(PluginInterface):
         self.show_image_in_description: bool = get_config_or_default(
             params, "show_image_in_description", True
         )
+        self.crawl_detail_page: bool = get_config_or_default(
+            params, "crawl_detail_page", True
+        )
 
         print(f"[ScraperSourcePlugin#{self.id}] initialized")
 
@@ -150,7 +153,7 @@ class Plugin(PluginInterface):
                 )
 
                 # Fetch and parse post detail page
-                if detail_page_url:
+                if detail_page_url and self.crawl_detail_page:
                     # Fetch
                     self.log(f"scraping detail page: {detail_page_url}")
                     detail_page_resp = self.get_url(session, url=detail_page_url)
