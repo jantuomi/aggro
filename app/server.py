@@ -1,7 +1,7 @@
+import os
 from typing import Any, cast
 import bottle
 from tinydb import Query
-
 from app.DatabaseManager import database_manager
 
 
@@ -17,6 +17,10 @@ def feed_to_tr(feed: dict[str, str]) -> str:
     return f'<tr>{feed_id_to_td(feed["feed_id"])}{feed_last_build_date_to_td(feed.get("feed_last_build_date", ""))}</tr>'
 
 
+def opml_to_tr() -> str:
+    return '<tr><td colspan="2"><a href="/opml">All feeds (OPML)</a></td></tr>'
+
+
 def feeds_to_table(feeds: list[dict[str, str]]) -> str:
     if len(feeds) == 0:
         return (
@@ -24,7 +28,7 @@ def feeds_to_table(feeds: list[dict[str, str]]) -> str:
             + "If you did that already, you might have to wait a bit for the data to propagate."
         )
 
-    trs: list[str] = [feed_to_tr(feed) for feed in feeds]
+    trs: list[str] = [feed_to_tr(feed) for feed in feeds] + [opml_to_tr()]
     thead = f"<thead><tr><td>Feed</td><td>Last build date</td></tr></thead>"
     tbody = f'<tbody>{"".join(trs)}</tbody>'
     return "<table>" + thead + tbody + "</table>"
@@ -113,6 +117,36 @@ def feed(feed_id: str):
     feed: Any = res[0]
     feed_xml: str = feed["feed_xml"]
     return feed_xml
+
+@bottle.route("/opml")
+def opml():
+    if database_manager.db is None:
+        raise Exception("Database is not initialized")
+
+    base_url = os.environ.get("AGGRO_BASE_URL", "http://localhost:8080")
+
+    _feeds = database_manager.feeds.all()
+    feeds = cast(list[dict[str, str]], _feeds)
+
+    bottle.response.set_header("content-type", "text/xml")
+
+    outlines = "\n".join(
+        f'<outline text="{feed["feed_id"]}" title="{feed["feed_id"]}" type="rss" xmlUrl="{base_url}/{feed["feed_id"]}" />'
+        for feed in feeds
+    )
+
+    opml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0">
+  <head>
+    <title>Aggro Subscriptions</title>
+  </head>
+  <body>
+{outlines}
+  </body>
+</opml>
+"""
+    return opml
+
 
 
 def run_web_server(host: str, port: int):

@@ -12,7 +12,9 @@ class Plugin(PluginInterface):
     def __init__(self, id: str, params: Params) -> None:
         super().__init__("JsonApiSourcePlugin", id, params)
         self.url: str = get_config(params, "url").strip("/")
-        self.method: str = get_config_or_default(params, "method", "get").strip().tolower()
+        self.method: str = get_config_or_default(params, "method", "get").strip().lower()
+        self.body: str | None = get_config_or_default(params, "body", None)
+        self.headers: dict = get_config_or_default(params, "headers", {})
         self.selector_post: str = get_config(params, "selector_post")
         self.selector_title: str | None = get_config_or_default(
             params, "selector_title", None
@@ -55,14 +57,22 @@ class Plugin(PluginInterface):
         result_items: list[Item] = []
         with requests.session() as session:
             fetch_fn = getattr(session, self.method)
-            api_resp = fetch_fn(self.url, allow_redirects=True)
+            body = (
+                json.dumps(self.body)
+                if self.body and (type(self.body) is dict or type(self.body) is list)
+                else self.body
+            )
+            api_resp = fetch_fn(self.url, allow_redirects=True, data=body, headers=self.headers)
             data = json.loads(api_resp.text)
-            post_items = eval(self.selector_post, {"data": data})
+
+            ctx = {"json": json, "data": data}
+            post_items = eval(self.selector_post, ctx)
 
             for post in post_items:
+                ctx = {"json": json, "post": post, "data": data}
                 if self.selector_link:
                     link = eval(
-                        self.selector_link, {"post": post, "data": data}
+                        self.selector_link, ctx
                     ).strip()
                     guid = ItemGUID(link, is_perma_link=True)
                 else:
@@ -71,28 +81,28 @@ class Plugin(PluginInterface):
 
                 if self.selector_title:
                     title = eval(
-                        self.selector_title, {"post": post, "data": data}
+                        self.selector_title, ctx
                     ).strip()
                 else:
                     title = None
 
                 if self.selector_description:
                     description = eval(
-                        self.selector_description, {"post": post, "data": data}
+                        self.selector_description, ctx
                     ).strip()
                 else:
                     description = None
 
                 if self.selector_date:
                     date = eval(
-                        self.selector_date, {"post": post, "data": data}
+                        self.selector_date, ctx
                     ).strip()
                 else:
                     date = None
 
                 if self.selector_author:
                     author = eval(
-                        self.selector_author, {"post": post, "data": data}
+                        self.selector_author, ctx
                     ).strip()
                 else:
                     author = None
@@ -100,7 +110,7 @@ class Plugin(PluginInterface):
                 if self.selector_image:
                     try:
                         image_src = eval(
-                            self.selector_image, {"post": post, "data": data}
+                            self.selector_image, ctx
                         ).strip()
                     except Exception:
                         print_exc()
