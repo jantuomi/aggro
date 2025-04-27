@@ -12,6 +12,7 @@ class Plugin(PluginInterface):
     def __init__(self, id: str, params: Params) -> None:
         super().__init__("JsonApiSourcePlugin", id, params)
         self.url: str = get_config(params, "url").strip("/")
+        self.method: str = get_config_or_default(params, "method", "get").strip().tolower()
         self.selector_post: str = get_config(params, "selector_post")
         self.selector_title: str | None = get_config_or_default(
             params, "selector_title", None
@@ -53,7 +54,8 @@ class Plugin(PluginInterface):
 
         result_items: list[Item] = []
         with requests.session() as session:
-            api_resp = session.get(self.url, allow_redirects=True)
+            fetch_fn = getattr(session, self.method)
+            api_resp = fetch_fn(self.url, allow_redirects=True)
             data = json.loads(api_resp.text)
             post_items = eval(self.selector_post, {"data": data})
 
